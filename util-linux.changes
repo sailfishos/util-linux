@@ -1,0 +1,17 @@
+* Thu Jul 07 2011 Anas Nashif <anas.nashif@intel.com> - 2.19.1
+- Do not require Consolekit-libs
+- Dont provide ourselves
+
+* Fri Jul 04 2011 Yan Li <yan.i.li@intel.com> - 2.19.1
+- Revert which to 2.17 (BMC#11589)
+
+* Tue Jun 28 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.19.1
+- updated to enable libmount support
+
+* Sat Jun 18 2011 Anas Nashif <anas.nashif@intel.com> - 2.19.1
+- Cleanup spec
+- Provide util-linux-ng
+
+* Mon Jun 13 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.19.1
+- inital commit of util-linux which is the re-upstream of the old util-linux-ng.
+- also update the which sub package
