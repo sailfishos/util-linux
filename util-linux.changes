@@ -1,3 +1,6 @@
+* Tue Dec 13 2011 Carsten Munk <carsten.munk@gmail.com> - 2.19.1
+- Add patch to cfdisk Makefile.am in order to fix missing -ltinfo linkage
+
 * Thu Jul 07 2011 Anas Nashif <anas.nashif@intel.com> - 2.19.1
 - Do not require Consolekit-libs
 - Dont provide ourselves

@@ -32,6 +32,7 @@ Source9:        nologin.8
 Source10:       http://ftp.gnu.org/gnu/which/which-%{whichver}.tar.gz
 
 Patch0:         disable-lscpu.patch
+Patch1:		util-linux-2.19.1-fixtinfo.patch
 
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
@@ -130,6 +131,7 @@ This is block device identification library, part of util-linux.
 %setup -q -b 10 -n %{name}-%{version}
 cp %{SOURCE8} %{SOURCE9} .
 %patch0 -p1
+%patch1 -p1
 
 rm -rf ./sys-utils/lscpu.*
 rm -rf ./tests/ts/lscpu
