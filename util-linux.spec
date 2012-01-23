@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.19.1
+Version:        2.20.1
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -22,7 +22,7 @@ BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
 
 ### Sources
-Source0:        ftp://ftp.kernel.org/pub/linux/utils/util-linux/v2.15/util-linux-%{version}.tar.bz2
+Source0:        ftp://ftp.infradead.org/pub/util-linux/v2.20/util-linux-%{version}.tar.bz2
 Source1:        util-linux-login.pamd
 Source2:        util-linux-remote.pamd
 Source3:        util-linux-chsh-chfn.pamd
@@ -32,7 +32,7 @@ Source9:        nologin.8
 Source10:       http://ftp.gnu.org/gnu/which/which-%{whichver}.tar.gz
 
 Patch0:         disable-lscpu.patch
-Patch1:		util-linux-2.19.1-fixtinfo.patch
+Patch1:         util-linux-2.19.1-fixtinfo.patch
 
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
@@ -327,7 +327,6 @@ exit 0
 %files
 %defattr(-,root,root)
 %doc AUTHORS licenses/*
-%doc %{_mandir}/ru/man1/ddate.1.gz
 /bin/dmesg
 %attr(755,root,root) /bin/login
 /bin/more
@@ -335,6 +334,7 @@ exit 0
 /bin/taskset
 /bin/findmnt
 /bin/lsblk
+/bin/mountpoint
 
 %{_defaultdocdir}/which/
 
@@ -388,7 +388,6 @@ exit 0
 %ifarch %cytune_archs
 %{_bindir}/cytune
 %endif
-%{_bindir}/ddate
 %{_sbindir}/fdformat
 %{_bindir}/flock
 %{_bindir}/getopt

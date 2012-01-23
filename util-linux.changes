@@ -1,3 +1,7 @@
+* Thu Jan 12 2012 Marko Saukko <marko.saukko@gmail.com> - 2.20.1
+- Fixes NEMO#126: Update util-linux to version 2.20.1.
+- Removed patch merged to upstream: disable-lscpu.patch
+
 * Tue Dec 13 2011 Carsten Munk <carsten.munk@gmail.com> - 2.19.1
 - Add patch to cfdisk Makefile.am in order to fix missing -ltinfo linkage
 

@@ -1,13 +1,14 @@
-diff -uprN util-linux-2.19.1/sys-utils/Makefile.am util-linux-2.19.1-NEW/sys-utils/Makefile.am
---- util-linux-2.19.1/sys-utils/Makefile.am	2011-04-05 03:43:02.000000000 -0700
-+++ util-linux-2.19.1-NEW/sys-utils/Makefile.am	2011-06-09 16:18:32.467491001 -0700
-@@ -17,12 +17,6 @@ usrsbin_exec_PROGRAMS += ldattach tunelp
+diff --git a/sys-utils/Makefile.am b/sys-utils/Makefile.am
+index feb5888..9cf6e50 100644
+--- a/sys-utils/Makefile.am
++++ b/sys-utils/Makefile.am
+@@ -17,12 +17,6 @@ usrsbin_exec_PROGRAMS += ldattach tunelp rtcwake
  dist_man_MANS += dmesg.1 ctrlaltdel.8 cytune.8 setarch.8 \
  		ldattach.8 tunelp.8 rtcwake.8 fsfreeze.8 fstrim.8
  
 -if HAVE_CPU_SET_T
 -usrbin_exec_PROGRAMS += lscpu
--lscpu_SOURCES = lscpu.c $(top_srcdir)/lib/cpuset.c
+-lscpu_SOURCES = lscpu.c $(top_srcdir)/lib/cpuset.c $(top_srcdir)/lib/strutils.c
 -dist_man_MANS += lscpu.1
 -endif
 -
