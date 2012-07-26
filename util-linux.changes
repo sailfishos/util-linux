@@ -1,3 +1,9 @@
+* Fri Jul 20 2012 Marko Saukko <marko.saukko@jollamobile.com> - 2.21.2
+- Update util-linux to versoin 2.21.2
+- Conflicts with e2fsprogs <= 1.42.2 as fsck got moved here again.
+- Merge util-linux-ng back to the main package.
+- Add /etc/mtab symlink to this package
+
 * Thu Jan 12 2012 Marko Saukko <marko.saukko@gmail.com> - 2.20.1
 - Fixes NEMO#126: Update util-linux to version 2.20.1.
 - Removed patch merged to upstream: disable-lscpu.patch

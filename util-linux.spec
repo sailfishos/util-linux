@@ -1,10 +1,10 @@
 ### Header
 Name:           util-linux
-Version:        2.20.1
+Version:        2.21.2
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
-Url:            ftp://ftp.kernel.org/pub/linux/utils/util-linux
+Url:            http://kernel.org/~kzak/util-linux/
 Group:          System/Base
 
 ### Macros
@@ -22,7 +22,7 @@ BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
 
 ### Sources
-Source0:        ftp://ftp.infradead.org/pub/util-linux/v2.20/util-linux-%{version}.tar.bz2
+Source0:        ftp://ftp.kernel.org/pub/linux/utils/util-linux/v2.21/util-linux-%{version}.tar.xz
 Source1:        util-linux-login.pamd
 Source2:        util-linux-remote.pamd
 Source3:        util-linux-chsh-chfn.pamd
@@ -31,7 +31,15 @@ Source8:        nologin.c
 Source9:        nologin.8
 Source10:       http://ftp.gnu.org/gnu/which/which-%{whichver}.tar.gz
 
-Patch0:         disable-lscpu.patch
+### Obsoletes & Conflicts & Provides
+# old versions of e2fsprogs contain fsck, uuidgen
+Conflicts: e2fsprogs <= 1.42.2
+# rename from util-linux-ng back to util-linux
+Obsoletes: util-linux-ng <= 2.20.1
+Provides: util-linux-ng = %{version}-%{release}
+Conflicts: filesystem < 3
+
+Patch0:         util-linux-2.21.2-config-option-lscpu-prlimit.patch
 Patch1:         util-linux-2.19.1-fixtinfo.patch
 
 Requires:       /etc/pam.d/system-auth
@@ -39,6 +47,8 @@ Requires:       pam >= 0.66-4
 Obsoletes:      which
 Provides:       which
 Provides:       mount
+Requires: libuuid = %{version}-%{release}
+Requires: libblkid = %{version}-%{release}
 Requires(post): coreutils
 
 %description
@@ -51,6 +61,8 @@ program.
 License:        LGPLv2+
 Summary:        Block device ID library
 Group:          System/Libraries
+Requires:       libuuid = %{version}-%{release}
+Requires(post): coreutils
 
 %description -n libblkid
 This is block device identification library, part of util-linux.
@@ -60,9 +72,6 @@ License:        LGPLv2+
 Summary:        Block device ID library
 Group:          Development/Libraries
 Requires:       libblkid = %{version}
-Requires:       pkgconfig
-# for libuuid and uuid.pc
-Requires:       pkgconfig(uuid)
 
 %description -n libblkid-devel
 This is the block device identification development library and headers,
@@ -89,9 +98,8 @@ See also the "uuid" package, which is a separate implementation.
 License:        BSD
 Summary:        Universally unique ID library
 Group:          Development/Libraries
-Requires:       libuuid = %{version}
-Requires:       pkgconfig
-Provides:       libuuid-static = %{version}
+Requires:       libuuid = %{version}-%{release}
+Provides:       libuuid-static = %{version}-%{release}
 
 %description -n libuuid-devel
 This is the universally unique ID development library and headers,
@@ -110,7 +118,7 @@ See also the "uuid-devel" package, which is a separate implementation.
 License:        GPLv2
 Summary:        Helper daemon to guarantee uniqueness of time-based UUIDs
 Group:          System/Daemons
-Requires:       libuuid = %{version}
+Requires:       libuuid = %{version}-%{release}
 Requires(pre): shadow-utils
 
 %description -n uuidd
@@ -118,23 +126,18 @@ The uuidd package contains a userspace daemon (uuidd) which guarantees
 uniqueness of time-based UUID generation even at very high rates on
 SMP systems.
 
-%package -n util-linux-ng
-License:        LGPLv2+
-Summary:        Block device ID library
-Group:          System/Libraries
-Requires:	util-linux
-
-%description -n util-linux-ng
-This is block device identification library, part of util-linux.
 
 %prep
 %setup -q -b 10 -n %{name}-%{version}
 cp %{SOURCE8} %{SOURCE9} .
+
 %patch0 -p1
 %patch1 -p1
 
-rm -rf ./sys-utils/lscpu.*
-rm -rf ./tests/ts/lscpu
+# GPLv3 files remove those to be sure those are not used.
+# Not removed as not ending to binaries: rm -rf tests/ts/lscpu/lscpu tools/git-version-gen 
+# WARNING WARNING!!! fdisk and partx use this as well...
+# rm -rf lib/mbsalign.c
 
 %build
 unset LINGUAS || :
@@ -142,16 +145,18 @@ unset LINGUAS || :
 export CFLAGS="-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 %{optflags}"
 export SUID_CFLAGS="-fpie"
 export SUID_LDFLAGS="-pie"
+./autogen.sh
 %configure \
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--disable-wall \
+        --disable-lscpu \
+        --disable-prlimit \
 	--enable-partx \
 	--enable-login-utils \
 	--enable-kill \
 	--enable-write \
-	--enable-libmount-mount \
-	--with-fsprobe=builtin \
+	--enable-new-mount \
 	--disable-makeinstall-chown
 
 # build util-linux
@@ -220,21 +225,20 @@ rm -f %{buildroot}%{_bindir}/cytune %{buildroot}%{_mandir}/man8/cytune.8*
 %endif
 
 # deprecated commands
-for I in /sbin/fsck.minix /sbin/fsck /sbin/mkfs.{bfs,minix} /sbin/sln \
+for I in /sbin/mkfs.bfs /usr/sbin/sln \
 	/usr/bin/chkdupexe %{_bindir}/line %{_bindir}/pg %{_bindir}/newgrp \
-	/sbin/shutdown %{_bindir}/scriptreplay /usr/sbin/vipw /usr/sbin/vigr; do
-	rm -f %{buildroot}$I
+	/usr/sbin/shutdown /usr/sbin/vipw /usr/sbin/vigr; do
+	rm -f $RPM_BUILD_ROOT$I
 done
 
 # deprecated man pages
 for I in man1/chkdupexe.1 man1/line.1 man1/pg.1 man1/newgrp.1 \
-	man8/fsck.minix.8 man8/fsck.8 man8/mkfs.minix.8 man8/mkfs.bfs.8 man1/scriptreplay.1 \
-	man8/vipw.8 man8/vigr; do
-	rm -rf %{buildroot}%{_mandir}/${I}*
+	man8/mkfs.bfs.8 man8/vipw.8 man8/vigr; do
+	rm -rf $RPM_BUILD_ROOT%{_mandir}/${I}*
 done
 
 # deprecated docs
-for I in text-utils/README.pg misc-utils/README.reset; do
+for I in floppy-%{floppyver}/README.html; do
 	rm -rf $I
 done
 
@@ -266,6 +270,8 @@ for I in raw; do
 	fi
 done
 
+ln -s /proc/self/mounts %{buildroot}/etc/mtab
+
 # find MO files
 %find_lang %{name}
 
@@ -282,7 +288,6 @@ install -m 0644 README.alias %{buildroot}%{_defaultdocdir}/which/
 
 rm -f %{buildroot}%{_infodir}/dir
 
-
 cd ../%{name}-%{version}
 # create list of setarch(8) symlinks
 find  %{buildroot}%{_bindir}/ -regextype posix-egrep -type l \
@@ -295,18 +300,28 @@ find  %{buildroot}%{_mandir}/man8 -regextype posix-egrep  \
 
 %post
 # only for minimal buildroots without /var/log
-[ -d /var/log ] || /bin/mkdir -p /var/log
-/bin/touch /var/log/lastlog
-/bin/chown root:root /var/log/lastlog
-/bin/chmod 0644 /var/log/lastlog
-# Fix the file context, do not use restorecon
+[ -d /var/log ] || mkdir -p /var/log
+touch /var/log/lastlog
+chown root:root /var/log/lastlog
+chmod 0644 /var/log/lastlog
+/sbin/ldconfig
 
-
+# Make sure mtab points to right place.
+rm -f /etc/mtab
+ln -s /proc/self/mounts /etc/mtab
 
 %post -n libblkid
 /sbin/ldconfig
-[ -e /etc/blkid.tab ] && mv /etc/blkid.tab /etc/blkid/blkid.tab || :
-[ -e /etc/blkid.tab.old ] && mv /etc/blkid.tab.old /etc/blkid/blkid.tab.old || :
+
+### Move blkid cache to /run
+[ -d /run/blkid ] || mkdir -p /run/blkid
+for I in /etc/blkid.tab /etc/blkid.tab.old \
+         /etc/blkid/blkid.tab /etc/blkid/blkid.tab.old; do
+
+	if [ -f "$I" ]; then
+		mv "$I" /run/blkid/ || :
+	fi
+done
 
 %postun -n libblkid -p /sbin/ldconfig
 
@@ -326,7 +341,16 @@ exit 0
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS licenses/*
+%doc AUTHORS Documentation/licenses/*
+
+%config(noreplace)	%{_sysconfdir}/pam.d/chfn
+%config(noreplace)	%{_sysconfdir}/pam.d/chsh
+%config(noreplace)	%{_sysconfdir}/pam.d/login
+%config(noreplace)	%{_sysconfdir}/pam.d/remote
+
+%ghost %attr(0644,root,root) %verify(not md5 size mtime) /var/log/lastlog
+%ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/mtab
+
 /bin/dmesg
 %attr(755,root,root) /bin/login
 /bin/more
@@ -339,11 +363,6 @@ exit 0
 %{_defaultdocdir}/which/
 
 %{_bindir}/which
-
-%config(noreplace)	%{_sysconfdir}/pam.d/chfn
-%config(noreplace)	%{_sysconfdir}/pam.d/chsh
-%config(noreplace)	%{_sysconfdir}/pam.d/login
-%config(noreplace)	%{_sysconfdir}/pam.d/remote
 
 /sbin/agetty
 /sbin/blockdev
@@ -362,18 +381,19 @@ exit 0
 
 %ifnarch %no_cfsfdisk_archs
 /sbin/sfdisk
-%doc fdisk/sfdisk.examples
 /sbin/cfdisk
 %endif
 
+/bin/raw
+/sbin/chcpu
 /sbin/fdisk
 /sbin/clock
 /sbin/hwclock
 %{_sbindir}/hwclock
 /sbin/mkfs
+/sbin/mkfs.minix
 /sbin/mkswap
 /sbin/nologin
-%ghost %attr(0644,root,root)	%verify(not md5 size mtime)	%{_localstatedir}/log/lastlog
 
 %{_bindir}/chrt
 %{_bindir}/ionice
@@ -399,14 +419,16 @@ exit 0
 %{_bindir}/logger
 %{_bindir}/look
 %{_bindir}/mcookie
-#/sbin/fsck
+/sbin/fsck
 /sbin/fsck.cramfs
+/sbin/fsck.minix
 /sbin/mkfs.cramfs
 %{_bindir}/namei
 %{_bindir}/rename
 %{_bindir}/renice
 %{_bindir}/rev
 %{_bindir}/script
+%{_bindir}/scriptreplay
 %{_bindir}/setarch
 %{_bindir}/setsid
 %{_bindir}/setterm
@@ -431,36 +453,41 @@ exit 0
 
 %files -n uuidd
 %defattr(-,root,root)
+%doc Documentation/licenses/COPYING.GPLv2
 %attr(-, uuidd, uuidd) %{_sbindir}/uuidd
 %dir %attr(2775, uuidd, uuidd) /var/lib/libuuid
 %dir %attr(2775, uuidd, uuidd) /var/run/uuidd
 
-%files -n util-linux-ng
-%defattr(-,root,root)
-
 %files -n libblkid
 %defattr(-,root,root)
-%dir %{_sysconfdir}/blkid
+%doc libblkid/COPYING
 %{_libdir}/libblkid.so.*
-%{_libdir}/libmount.so*
-
+#libmount
+%doc libmount/COPYING
+%{_libdir}/libmount.so.*
 
 %files -n libblkid-devel
 %defattr(-,root,root)
+%doc libblkid/COPYING
 %{_libdir}/libblkid.so
 %{_includedir}/blkid
+%{_mandir}/man3/libblkid.3*
+%{_libdir}/pkgconfig/blkid.pc
+# libmount
+%doc libmount/COPYING
+%{_libdir}/libmount.so
 %{_includedir}/libmount
 %{_libdir}/pkgconfig/mount.pc
-%{_libdir}/pkgconfig/blkid.pc
 
 %files -n libuuid
 %defattr(-,root,root)
-%{_prefix}/lib/libuuid.so.*
+%doc libuuid/COPYING
+%{_libdir}/libuuid.so.*
 
 %files -n libuuid-devel
 %defattr(-,root,root)
+%doc libuuid/COPYING
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
-
 
