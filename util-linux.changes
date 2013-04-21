@@ -1,5 +1,10 @@
+* Sat Apr 20 2013 Marko Saukko <marko.saukko@jollamobile.com> - 2.22.2
+- Update util-linux to version 2.22.2. Fixes MER#477
+- Add: mbsalign-license.patch
+- Drop: util-linux-2.19.1-fixtinfo.patch
+
 * Fri Jul 20 2012 Marko Saukko <marko.saukko@jollamobile.com> - 2.21.2
-- Update util-linux to versoin 2.21.2
+- Update util-linux to version 2.21.2
 - Conflicts with e2fsprogs <= 1.42.2 as fsck got moved here again.
 - Merge util-linux-ng back to the main package.
 - Add /etc/mtab symlink to this package

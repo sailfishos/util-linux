@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.21.2
+Version:        2.22.2
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -30,6 +30,8 @@ Source4:        util-linux-60-raw.rules
 Source8:        nologin.c
 Source9:        nologin.8
 Source10:       http://ftp.gnu.org/gnu/which/which-%{whichver}.tar.gz
+Source11:       util-linux-su.pamd
+Source12:       util-linux-su-l.pamd
 
 ### Obsoletes & Conflicts & Provides
 # old versions of e2fsprogs contain fsck, uuidgen
@@ -40,7 +42,7 @@ Provides: util-linux-ng = %{version}-%{release}
 Conflicts: filesystem < 3
 
 Patch0:         util-linux-2.21.2-config-option-lscpu-prlimit.patch
-Patch1:         util-linux-2.19.1-fixtinfo.patch
+Patch1:         mbsalign-license.patch
 
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
@@ -138,6 +140,7 @@ cp %{SOURCE8} %{SOURCE9} .
 # Not removed as not ending to binaries: rm -rf tests/ts/lscpu/lscpu tools/git-version-gen 
 # WARNING WARNING!!! fdisk and partx use this as well...
 # rm -rf lib/mbsalign.c
+# NOTE: mbsalign-license.patch fixes this.
 
 %build
 unset LINGUAS || :
@@ -150,11 +153,12 @@ export SUID_LDFLAGS="-pie"
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--disable-wall \
-        --disable-lscpu \
-        --disable-prlimit \
+	--disable-lscpu \
+	--disable-prlimit \
 	--enable-partx \
 	--enable-login-utils \
 	--enable-kill \
+	--enable-chfn-chsh \
 	--enable-write \
 	--enable-new-mount \
 	--disable-makeinstall-chown
@@ -190,8 +194,6 @@ chmod 0644 %{buildroot}%{_localstatedir}/log/lastlog
 install -m 755 nologin %{buildroot}/sbin
 install -m 644 nologin.8 %{buildroot}%{_mandir}/man8
 
-
-
 # PAM settings
 {
 	pushd %{buildroot}%{_sysconfdir}/pam.d
@@ -199,6 +201,8 @@ install -m 644 nologin.8 %{buildroot}%{_mandir}/man8
 	install -m 644 %{SOURCE2} ./remote
 	install -m 644 %{SOURCE3} ./chsh
 	install -m 644 %{SOURCE3} ./chfn
+	install -m 644 %{SOURCE11} ./su
+	install -m 644 %{SOURCE12} ./su-l
 	popd
 }
 
@@ -243,7 +247,7 @@ for I in floppy-%{floppyver}/README.html; do
 done
 
 # we install getopt/getopt-*.{bash,tcsh} as doc files
-chmod 644 getopt/getopt-*.{bash,tcsh}
+#chmod 644 getopt/getopt-*.{bash,tcsh}
 rm -f %{buildroot}%{_datadir}/getopt/*
 rmdir %{buildroot}%{_datadir}/getopt
 
@@ -347,12 +351,20 @@ exit 0
 %config(noreplace)	%{_sysconfdir}/pam.d/chsh
 %config(noreplace)	%{_sysconfdir}/pam.d/login
 %config(noreplace)	%{_sysconfdir}/pam.d/remote
+%config(noreplace)	%{_sysconfdir}/pam.d/su
+%config(noreplace)	%{_sysconfdir}/pam.d/su-l
 
 %ghost %attr(0644,root,root) %verify(not md5 size mtime) /var/log/lastlog
 %ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/mtab
 
 /bin/dmesg
-%attr(755,root,root) /bin/login
+%attr(4755,root,root)	/bin/mount
+%attr(4755,root,root)	/bin/umount
+%attr(4755,root,root)	/bin/su
+%attr(755,root,root)	/bin/login
+%attr(4711,root,root)	%{_bindir}/chfn
+%attr(4711,root,root)	%{_bindir}/chsh
+%attr(2755,root,tty)	%{_bindir}/write
 /bin/more
 /bin/kill
 /bin/taskset
@@ -385,6 +397,7 @@ exit 0
 %endif
 
 /bin/raw
+/bin/wdctl
 /sbin/chcpu
 /sbin/fdisk
 /sbin/clock
@@ -394,13 +407,12 @@ exit 0
 /sbin/mkfs.minix
 /sbin/mkswap
 /sbin/nologin
+/sbin/sulogin
 
 %{_bindir}/chrt
 %{_bindir}/ionice
 
 %{_bindir}/cal
-%attr(4711,root,root)	%{_bindir}/chfn
-%attr(4711,root,root)	%{_bindir}/chsh
 %{_bindir}/col
 %{_bindir}/colcrt
 %{_bindir}/colrm
@@ -409,6 +421,7 @@ exit 0
 %{_bindir}/cytune
 %endif
 %{_sbindir}/fdformat
+%{_sbindir}/resizepart
 %{_bindir}/flock
 %{_bindir}/getopt
 %{_bindir}/hexdump
@@ -435,15 +448,15 @@ exit 0
 %{_bindir}/tailf
 %{_bindir}/ul
 %{_bindir}/uuidgen
+%{_bindir}/eject
+%{_bindir}/lslocks
+%{_bindir}/utmpdump
 %{_bindir}/whereis
-%attr(2755,root,tty)	%{_bindir}/write
 
 %{_sbindir}/readprofile
 %{_sbindir}/tunelp
 %{_sbindir}/rtcwake
 %{_sbindir}/ldattach
-%attr(4755,root,root)	/bin/mount
-%attr(4755,root,root)	/bin/umount
 /sbin/swapon
 /sbin/swapoff
 /sbin/switch_root
