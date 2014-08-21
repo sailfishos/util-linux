@@ -20,6 +20,7 @@ BuildRequires:  pkgconfig(ext2fs) >= 1.36
 BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
+BuildRequires:  libutempter-devel
 
 ### Sources
 Source0:        ftp://ftp.kernel.org/pub/linux/utils/util-linux/v2.21/util-linux-%{version}.tar.xz
@@ -161,6 +162,7 @@ export SUID_LDFLAGS="-pie"
 	--enable-chfn-chsh \
 	--enable-write \
 	--enable-new-mount \
+	--with-utempter \
 	--disable-makeinstall-chown
 
 # build util-linux
