@@ -1,6 +1,6 @@
 #%PAM-1.0
-auth       required     pam_securetty.so
-auth       include      system-auth
+auth       substack     system-auth
+auth       include      postlogin
 account    required     pam_nologin.so
 account    include      system-auth
 password   include      system-auth
@@ -13,3 +13,5 @@ session    optional     pam_console.so
 session    required     pam_namespace.so
 session    optional     pam_keyinit.so force revoke
 session    include      system-auth
+session    include      postlogin
+-session   optional     pam_ck_connector.so
