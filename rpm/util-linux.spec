@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.22.2
+Version:        2.25
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -24,16 +24,16 @@ BuildRequires:  pkgconfig(zlib)
 BuildRequires:  libutempter-devel
 
 ### Sources
-Source0:        ftp://ftp.kernel.org/pub/linux/utils/util-linux/v2.21/util-linux-%{version}.tar.xz
+Source0:        %{name}-%{version}.tar.xz
 Source1:        util-linux-login.pamd
 Source2:        util-linux-remote.pamd
 Source3:        util-linux-chsh-chfn.pamd
 Source4:        util-linux-60-raw.rules
-Source8:        nologin.c
-Source9:        nologin.8
 Source10:       http://ftp.gnu.org/gnu/which/which-%{whichver}.tar.gz
 Source11:       util-linux-su.pamd
 Source12:       util-linux-su-l.pamd
+Source14:       util-linux-runuser.pamd
+Source15:       util-linux-runuser-l.pamd
 
 ### Obsoletes & Conflicts & Provides
 # old versions of e2fsprogs contain fsck, uuidgen
@@ -43,9 +43,6 @@ Obsoletes: util-linux-ng <= 2.20.1
 Provides: util-linux-ng = %{version}-%{release}
 Conflicts: filesystem < 3
 
-Patch0:         util-linux-2.21.2-config-option-lscpu-prlimit.patch
-Patch1:         mbsalign-license.patch
-
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
 Obsoletes:      which
@@ -53,6 +50,8 @@ Provides:       which
 Provides:       mount
 Requires: libuuid = %{version}-%{release}
 Requires: libblkid = %{version}-%{release}
+Requires: libmount = %{version}-%{release}
+Requires: libsmartcols = %{version}-%{release}
 Requires(post): coreutils
 
 %description
@@ -60,6 +59,47 @@ The util-linux package contains a large variety of low-level system
 utilities that are necessary for a Linux system to function. Among
 others, Util-linux contains the fdisk configuration tool and the login
 program.
+
+%package -n libsmartcols
+Summary: Formatting library for ls-like programs.
+Group: Development/Libraries
+License: LGPLv2+
+
+%description -n libsmartcols
+This is library for ls-like terminal programs, part of util-linux.
+
+
+%package -n libsmartcols-devel
+Summary: Formatting library for ls-like programs.
+Group: Development/Libraries
+License: LGPLv2+
+Requires: libsmartcols = %{version}-%{release}
+Requires: pkgconfig
+
+%description -n libsmartcols-devel
+This is development library and headers for ls-like terminal programs,
+part of util-linux.
+
+%package -n libmount
+Summary: Device mounting library
+Group: Development/Libraries
+License: LGPLv2+
+Requires: libblkid = %{version}-%{release}
+Requires: libuuid = %{version}-%{release}
+Conflicts: filesystem < 3
+
+%description -n libmount
+This is the device mounting library, part of util-linux.
+
+%package -n libmount-devel
+Summary: Device mounting library
+Group: Development/Libraries
+License: LGPLv2+
+Requires: libmount = %{version}-%{release}
+
+%description -n libmount-devel
+This is the device mounting development library and headers,
+part of util-linux.
 
 %package -n libblkid
 License:        LGPLv2+
@@ -132,21 +172,9 @@ SMP systems.
 
 
 %prep
-%setup -q -n %{name}-%{version}
-
-cd %{name}
-%patch0 -p1
-%patch1 -p1
-
-# GPLv3 files remove those to be sure those are not used.
-# Not removed as not ending to binaries: rm -rf tests/ts/lscpu/lscpu tools/git-version-gen 
-# WARNING WARNING!!! fdisk and partx use this as well...
-# rm -rf lib/mbsalign.c
-# NOTE: mbsalign-license.patch fixes this.
+%setup -q -n %{name}-%{version}/%{name}
 
 %build
-cd %{name}
-cp %{SOURCE8} %{SOURCE9} .
 tar xf %{SOURCE10}
 unset LINGUAS || :
 
@@ -159,22 +187,17 @@ export SUID_LDFLAGS="-pie"
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--disable-wall \
-	--disable-lscpu \
-	--disable-prlimit \
 	--enable-partx \
-	--enable-login-utils \
 	--enable-kill \
 	--enable-chfn-chsh \
 	--enable-write \
-	--enable-new-mount \
 	--with-utempter \
+	--without-python \
+	--disable-bash-completion \
 	--disable-makeinstall-chown
 
 # build util-linux
 make %{?_smp_mflags}
-
-# build nologin
-gcc $CFLAGS -o nologin nologin.c
 
 cd which-%{whichver}
 %configure
@@ -183,7 +206,6 @@ make %{?_smp_mflags}
 
 
 %install
-cd %{name}
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/{bin,sbin}
 mkdir -p %{buildroot}%{_bindir}
@@ -198,10 +220,6 @@ chmod 0644 %{buildroot}%{_localstatedir}/log/lastlog
 # install util-linux
 %make_install
 
-# install nologin
-install -m 755 nologin %{buildroot}/sbin
-install -m 644 nologin.8 %{buildroot}%{_mandir}/man8
-
 # PAM settings
 {
 	pushd %{buildroot}%{_sysconfdir}/pam.d
@@ -211,6 +229,8 @@ install -m 644 nologin.8 %{buildroot}%{_mandir}/man8
 	install -m 644 %{SOURCE3} ./chfn
 	install -m 644 %{SOURCE11} ./su
 	install -m 644 %{SOURCE12} ./su-l
+	install -m 644 %{SOURCE14} ./runuser
+	install -m 644 %{SOURCE15} ./runuser-l
 	popd
 }
 
@@ -220,7 +240,6 @@ ln -sf hwclock %{buildroot}/sbin/clock
 # And a dirs uuidd needs that the makefiles don't create
 install -d %{buildroot}%{_localstatedir}/run/uuidd
 install -d %{buildroot}%{_localstatedir}/lib/libuuid
-
 
 # remove libtool junk
 rm -f %{buildroot}%{_prefix}/lib/libblkid.la
@@ -254,10 +273,10 @@ for I in floppy-%{floppyver}/README.html; do
 	rm -rf $I
 done
 
-# we install getopt/getopt-*.{bash,tcsh} as doc files
-#chmod 644 getopt/getopt-*.{bash,tcsh}
-rm -f %{buildroot}%{_datadir}/getopt/*
-rmdir %{buildroot}%{_datadir}/getopt
+# we install getopt-*.{bash,tcsh} by %doc directive
+chmod 644 misc-utils/getopt-*.{bash,tcsh}
+rm -f %{buildroot}%{_datadir}/doc/util-linux/getopt/*
+rmdir %{buildroot}%{_datadir}/doc/util-linux/getopt
 
 ln -sf ../../bin/kill %{buildroot}%{_bindir}/kill
 
@@ -285,9 +304,7 @@ done
 ln -s /proc/self/mounts %{buildroot}/etc/mtab
 
 # find MO files
-cd ..
 %find_lang %{name}
-cd util-linux
 
 # which install
 cd which-%{whichver}
@@ -299,7 +316,7 @@ install -m 0644 README.alias %{buildroot}%{_defaultdocdir}/which/
 
 rm -f %{buildroot}%{_infodir}/dir
 
-cd ../../
+cd ../
 # create list of setarch(8) symlinks
 find  %{buildroot}%{_bindir}/ -regextype posix-egrep -type l \
 	-regex ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
@@ -339,6 +356,12 @@ done
 %post -n libuuid -p /sbin/ldconfig
 %postun -n libuuid -p /sbin/ldconfig
 
+%post -n libmount -p /sbin/ldconfig
+%postun -n libmount -p /sbin/ldconfig
+
+%post -n libsmartcols -p /sbin/ldconfig
+%postun -n libsmartcols -p /sbin/ldconfig
+
 %pre -n uuidd
 getent group uuidd >/dev/null || groupadd -r uuidd
 getent passwd uuidd >/dev/null || \
@@ -352,7 +375,7 @@ exit 0
 
 %files
 %defattr(-,root,root)
-%doc util-linux/AUTHORS util-linux/Documentation/licenses/*
+%doc AUTHORS Documentation/licenses/*
 
 %config(noreplace)	%{_sysconfdir}/pam.d/chfn
 %config(noreplace)	%{_sysconfdir}/pam.d/chsh
@@ -360,6 +383,8 @@ exit 0
 %config(noreplace)	%{_sysconfdir}/pam.d/remote
 %config(noreplace)	%{_sysconfdir}/pam.d/su
 %config(noreplace)	%{_sysconfdir}/pam.d/su-l
+%config(noreplace)      %{_sysconfdir}/pam.d/runuser
+%config(noreplace)      %{_sysconfdir}/pam.d/runuser-l
 
 %ghost %attr(0644,root,root) %verify(not md5 size mtime) /var/log/lastlog
 %ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/mtab
@@ -374,16 +399,25 @@ exit 0
 %attr(2755,root,tty)	%{_bindir}/write
 /bin/more
 /bin/kill
+%{_bindir}/last
+%{_bindir}/lastb
 /bin/taskset
 /bin/findmnt
 /bin/lsblk
+%{_bindir}/lscpu
+%{_bindir}/lslogins
 /bin/mountpoint
+%{_bindir}/mesg
+%{_bindir}/nsenter
+%{_bindir}/prlimit
+%{_bindir}/uname26
 
 %{_defaultdocdir}/which/
 
 %{_bindir}/which
 
 /sbin/agetty
+/sbin/blkdiscard
 /sbin/blockdev
 /sbin/pivot_root
 /sbin/ctrlaltdel
@@ -414,6 +448,7 @@ exit 0
 /sbin/mkfs.minix
 /sbin/mkswap
 /sbin/nologin
+/sbin/runuser
 /sbin/sulogin
 
 %{_bindir}/chrt
@@ -461,7 +496,6 @@ exit 0
 %{_bindir}/whereis
 
 %{_sbindir}/readprofile
-%{_sbindir}/tunelp
 %{_sbindir}/rtcwake
 %{_sbindir}/ldattach
 /sbin/swapon
@@ -473,40 +507,54 @@ exit 0
 
 %files -n uuidd
 %defattr(-,root,root)
-%doc util-linux/Documentation/licenses/COPYING.GPLv2
+%doc Documentation/licenses/COPYING.GPLv2
 %attr(-, uuidd, uuidd) %{_sbindir}/uuidd
 %dir %attr(2775, uuidd, uuidd) /var/lib/libuuid
 %dir %attr(2775, uuidd, uuidd) /var/run/uuidd
 
-%files -n libblkid
+%files -n libsmartcols
 %defattr(-,root,root)
-%doc util-linux/libblkid/COPYING
-%{_libdir}/libblkid.so.*
-#libmount
-%doc util-linux/libmount/COPYING
+%doc Documentation/licenses/COPYING.LGPLv2.1 libsmartcols/COPYING
+%{_libdir}/libsmartcols.so.*
+
+%files -n libsmartcols-devel
+%defattr(-,root,root)
+%{_libdir}/libsmartcols.so
+%{_includedir}/libsmartcols
+%{_libdir}/pkgconfig/smartcols.pc
+
+%files -n libmount
+%defattr(-,root,root)
+%doc libmount/COPYING
 %{_libdir}/libmount.so.*
 
-%files -n libblkid-devel
+%files -n libmount-devel
 %defattr(-,root,root)
-%doc util-linux/libblkid/COPYING
-%{_libdir}/libblkid.so
-%{_includedir}/blkid
-%{_mandir}/man3/libblkid.3*
-%{_libdir}/pkgconfig/blkid.pc
-# libmount
-%doc util-linux/libmount/COPYING
 %{_libdir}/libmount.so
 %{_includedir}/libmount
 %{_libdir}/pkgconfig/mount.pc
 
+%files -n libblkid
+%defattr(-,root,root)
+%doc libblkid/COPYING
+%{_libdir}/libblkid.so.*
+
+%files -n libblkid-devel
+%defattr(-,root,root)
+%doc libblkid/COPYING
+%{_libdir}/libblkid.so
+%{_includedir}/blkid
+%{_mandir}/man3/libblkid.3*
+%{_libdir}/pkgconfig/blkid.pc
+
 %files -n libuuid
 %defattr(-,root,root)
-%doc util-linux/libuuid/COPYING
+%doc libuuid/COPYING
 %{_libdir}/libuuid.so.*
 
 %files -n libuuid-devel
 %defattr(-,root,root)
-%doc util-linux/libuuid/COPYING
+%doc libuuid/COPYING
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
