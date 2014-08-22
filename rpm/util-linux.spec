@@ -12,6 +12,7 @@ Group:          System/Base
 %define no_cfsfdisk_archs sparc sparcv9 sparc64
 %define cytune_archs %{ix86} alpha armv4l
 
+BuildRequires:  libtool
 BuildRequires:  gettext-devel
 BuildRequires:  pam-devel
 BuildRequires:  texinfo
@@ -131,9 +132,9 @@ SMP systems.
 
 
 %prep
-%setup -q -b 10 -n %{name}-%{version}
-cp %{SOURCE8} %{SOURCE9} .
+%setup -q -n %{name}-%{version}
 
+cd %{name}
 %patch0 -p1
 %patch1 -p1
 
@@ -144,6 +145,9 @@ cp %{SOURCE8} %{SOURCE9} .
 # NOTE: mbsalign-license.patch fixes this.
 
 %build
+cd %{name}
+cp %{SOURCE8} %{SOURCE9} .
+tar xf %{SOURCE10}
 unset LINGUAS || :
 
 export CFLAGS="-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 %{optflags}"
@@ -151,6 +155,7 @@ export SUID_CFLAGS="-fpie"
 export SUID_LDFLAGS="-pie"
 ./autogen.sh
 %configure \
+	--with-systemdsystemunitdir=no \
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--disable-wall \
@@ -171,7 +176,6 @@ make %{?_smp_mflags}
 # build nologin
 gcc $CFLAGS -o nologin nologin.c
 
-cd ..
 cd which-%{whichver}
 %configure
 
@@ -179,6 +183,8 @@ make %{?_smp_mflags}
 
 
 %install
+cd %{name}
+rm -rf %{buildroot}
 mkdir -p %{buildroot}/{bin,sbin}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_infodir}
@@ -279,11 +285,10 @@ done
 ln -s /proc/self/mounts %{buildroot}/etc/mtab
 
 # find MO files
-%find_lang %{name}
-
-
-
 cd ..
+%find_lang %{name}
+cd util-linux
+
 # which install
 cd which-%{whichver}
 %make_install
@@ -294,7 +299,7 @@ install -m 0644 README.alias %{buildroot}%{_defaultdocdir}/which/
 
 rm -f %{buildroot}%{_infodir}/dir
 
-cd ../%{name}-%{version}
+cd ../../
 # create list of setarch(8) symlinks
 find  %{buildroot}%{_bindir}/ -regextype posix-egrep -type l \
 	-regex ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
@@ -347,7 +352,7 @@ exit 0
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS Documentation/licenses/*
+%doc util-linux/AUTHORS util-linux/Documentation/licenses/*
 
 %config(noreplace)	%{_sysconfdir}/pam.d/chfn
 %config(noreplace)	%{_sysconfdir}/pam.d/chsh
@@ -468,40 +473,40 @@ exit 0
 
 %files -n uuidd
 %defattr(-,root,root)
-%doc Documentation/licenses/COPYING.GPLv2
+%doc util-linux/Documentation/licenses/COPYING.GPLv2
 %attr(-, uuidd, uuidd) %{_sbindir}/uuidd
 %dir %attr(2775, uuidd, uuidd) /var/lib/libuuid
 %dir %attr(2775, uuidd, uuidd) /var/run/uuidd
 
 %files -n libblkid
 %defattr(-,root,root)
-%doc libblkid/COPYING
+%doc util-linux/libblkid/COPYING
 %{_libdir}/libblkid.so.*
 #libmount
-%doc libmount/COPYING
+%doc util-linux/libmount/COPYING
 %{_libdir}/libmount.so.*
 
 %files -n libblkid-devel
 %defattr(-,root,root)
-%doc libblkid/COPYING
+%doc util-linux/libblkid/COPYING
 %{_libdir}/libblkid.so
 %{_includedir}/blkid
 %{_mandir}/man3/libblkid.3*
 %{_libdir}/pkgconfig/blkid.pc
 # libmount
-%doc libmount/COPYING
+%doc util-linux/libmount/COPYING
 %{_libdir}/libmount.so
 %{_includedir}/libmount
 %{_libdir}/pkgconfig/mount.pc
 
 %files -n libuuid
 %defattr(-,root,root)
-%doc libuuid/COPYING
+%doc util-linux/libuuid/COPYING
 %{_libdir}/libuuid.so.*
 
 %files -n libuuid-devel
 %defattr(-,root,root)
-%doc libuuid/COPYING
+%doc util-linux/libuuid/COPYING
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
