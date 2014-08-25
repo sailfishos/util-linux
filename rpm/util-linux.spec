@@ -10,7 +10,6 @@ Group:          System/Base
 ### Macros
 %define whichver 2.17
 %define no_cfsfdisk_archs sparc sparcv9 sparc64
-%define cytune_archs %{ix86} alpha armv4l
 
 BuildRequires:  libtool
 BuildRequires:  gettext-devel
@@ -250,11 +249,6 @@ rm -f %{buildroot}/%{_lib}/libblkid.so
 #mv %{buildroot}/%{_lib}/libblkid.a %{buildroot}%{_libdir}/
 #ln -sf ../../%{_lib}/libblkid.so.1 %{buildroot}%{_libdir}/libblkid.so
 
-# Final cleanup
-%ifnarch %cytune_archs
-rm -f %{buildroot}%{_bindir}/cytune %{buildroot}%{_mandir}/man8/cytune.8*
-%endif
-
 # deprecated commands
 for I in /sbin/mkfs.bfs /usr/sbin/sln \
 	/usr/bin/chkdupexe %{_bindir}/line %{_bindir}/pg %{_bindir}/newgrp \
@@ -459,9 +453,6 @@ exit 0
 %{_bindir}/colcrt
 %{_bindir}/colrm
 %{_bindir}/column
-%ifarch %cytune_archs
-%{_bindir}/cytune
-%endif
 %{_sbindir}/fdformat
 %{_sbindir}/resizepart
 %{_bindir}/flock
