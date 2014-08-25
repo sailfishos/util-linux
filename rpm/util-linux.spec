@@ -174,6 +174,10 @@ SMP systems.
 %setup -q -n %{name}-%{version}/%{name}
 
 %build
+# Because .git dir isn't included in tar_git, we explicitly state
+# the version here.
+echo "2.25" > .tarball-version
+
 tar xf %{SOURCE10}
 unset LINGUAS || :
 
