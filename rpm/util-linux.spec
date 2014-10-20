@@ -51,6 +51,8 @@ Requires: libuuid = %{version}-%{release}
 Requires: libblkid = %{version}-%{release}
 Requires: libmount = %{version}-%{release}
 Requires: libsmartcols = %{version}-%{release}
+# Ensure that /var/log/lastlog has owner (setup)
+Requires: setup
 Requires(post): coreutils
 
 %description
@@ -217,8 +219,6 @@ mkdir -p %{buildroot}%{_mandir}/man{1,6,8,5}
 mkdir -p %{buildroot}%{_sbindir}
 mkdir -p %{buildroot}%{_sysconfdir}/{pam.d,security/console.apps,blkid}
 mkdir -p %{buildroot}%{_localstatedir}/log
-touch %{buildroot}%{_localstatedir}/log/lastlog
-chmod 0644 %{buildroot}%{_localstatedir}/log/lastlog
 
 # install util-linux
 %make_install
@@ -325,6 +325,9 @@ find  %{buildroot}%{_mandir}/man8 -regextype posix-egrep  \
 	-printf "%{_mandir}/man8/%f*\n" >> documentation.list
 
 %post
+# NOTE: /var/log/lastlog is owned (%ghost) by setup package
+# however it is created here as setup can not depend on the packages
+# that have the tools to create the file.
 # only for minimal buildroots without /var/log
 [ -d /var/log ] || mkdir -p /var/log
 touch /var/log/lastlog
@@ -384,7 +387,6 @@ exit 0
 %config(noreplace)      %{_sysconfdir}/pam.d/runuser
 %config(noreplace)      %{_sysconfdir}/pam.d/runuser-l
 
-%ghost %attr(0644,root,root) %verify(not md5 size mtime) /var/log/lastlog
 %ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/mtab
 
 /bin/dmesg
