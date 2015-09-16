@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.25
+Version:        2.27
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -51,6 +51,7 @@ Requires: libuuid = %{version}-%{release}
 Requires: libblkid = %{version}-%{release}
 Requires: libmount = %{version}-%{release}
 Requires: libsmartcols = %{version}-%{release}
+Requires: libfdisk = %{version}-%{release}
 # Ensure that /var/log/lastlog has owner (setup)
 Requires: setup
 Requires(post): coreutils
@@ -122,6 +123,24 @@ Requires:       libblkid = %{version}
 This is the block device identification development library and headers,
 part of util-linux.
 
+%package -n libfdisk
+Summary: Partitioning library for fdisk-like programs.
+Group: Development/Libraries
+License: LGPLv2+
+
+%description -n libfdisk
+This is library for fdisk-like programs, part of util-linux.
+
+%package -n libfdisk-devel
+Summary:  Partitioning library for fdisk-like programs.
+Group: Development/Libraries
+License: LGPLv2+
+Requires: libfdisk = %{version}-%{release}
+
+%description -n libfdisk-devel
+This is development library and headers for fdisk-like programs,
+part of util-linux.
+
 %package -n libuuid
 License:        BSD
 Summary:        Universally unique ID library
@@ -178,7 +197,7 @@ SMP systems.
 %build
 # Because .git dir isn't included in tar_git, we explicitly state
 # the version here.
-echo "2.25" > .tarball-version
+echo "2.27" > .tarball-version
 
 tar xf %{SOURCE10}
 unset LINGUAS || :
@@ -354,6 +373,9 @@ done
 
 %postun -n libblkid -p /sbin/ldconfig
 
+%post -n libfdisk -p /sbin/ldconfig
+%postun -n libfdisk -p /sbin/ldconfig
+
 %post -n libuuid -p /sbin/ldconfig
 %postun -n libuuid -p /sbin/ldconfig
 
@@ -405,6 +427,7 @@ exit 0
 /bin/findmnt
 /bin/lsblk
 %{_bindir}/lscpu
+%{_bindir}/lsipc
 %{_bindir}/lslogins
 /bin/mountpoint
 %{_bindir}/mesg
@@ -501,6 +524,7 @@ exit 0
 /sbin/losetup
 /sbin/blkid
 /sbin/findfs
+/sbin/zramctl
 
 %files -n uuidd
 %defattr(-,root,root)
@@ -543,6 +567,17 @@ exit 0
 %{_includedir}/blkid
 %{_mandir}/man3/libblkid.3*
 %{_libdir}/pkgconfig/blkid.pc
+
+%files -n libfdisk
+%defattr(-,root,root)
+%doc libfdisk/COPYING
+%{_libdir}/libfdisk.so.*
+
+%files -n libfdisk-devel
+%defattr(-,root,root)
+%{_libdir}/libfdisk.so
+%{_includedir}/libfdisk
+%{_libdir}/pkgconfig/fdisk.pc
 
 %files -n libuuid
 %defattr(-,root,root)
