@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.27
+Version:        2.28.1
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -197,7 +197,7 @@ SMP systems.
 %build
 # Because .git dir isn't included in tar_git, we explicitly state
 # the version here.
-echo "2.27" > .tarball-version
+echo %{version} > .tarball-version
 
 tar xf %{SOURCE10}
 unset LINGUAS || :
@@ -429,6 +429,7 @@ exit 0
 %{_bindir}/lscpu
 %{_bindir}/lsipc
 %{_bindir}/lslogins
+%{_bindir}/lsns
 /bin/mountpoint
 %{_bindir}/mesg
 %{_bindir}/nsenter
