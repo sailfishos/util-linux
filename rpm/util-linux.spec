@@ -197,7 +197,7 @@ SMP systems.
 %build
 # Because .git dir isn't included in tar_git, we explicitly state
 # the version here.
-echo %{version} > .tarball-version
+echo %{version} | cut -d '+' -f 1 > .tarball-version
 
 tar xf %{SOURCE10}
 unset LINGUAS || :
