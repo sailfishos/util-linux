@@ -21,6 +21,7 @@ BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  libutempter-devel
+BuildRequires:  bison
 
 ### Sources
 Source0:        %{name}-%{version}.tar.xz
