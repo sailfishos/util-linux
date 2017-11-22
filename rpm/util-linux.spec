@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.28.1
+Version:        2.31
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -55,6 +55,9 @@ Requires: libfdisk = %{version}-%{release}
 # Ensure that /var/log/lastlog has owner (setup)
 Requires: setup
 Requires(post): coreutils
+
+Obsoletes: rfkill < %{version}-%{release}
+Provides: rfkill = %{version}-%{release}
 
 %description
 The util-linux package contains a large variety of low-level system
@@ -343,6 +346,8 @@ find  %{buildroot}%{_mandir}/man8 -regextype posix-egrep  \
 	-regex ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
 	-printf "%{_mandir}/man8/%f*\n" >> documentation.list
 
+mv %{buildroot}%{_bindir}/rfkill %{buildroot}%{_sbindir}
+
 %post
 # NOTE: /var/log/lastlog is owned (%ghost) by setup package
 # however it is created here as setup can not depend on the packages
@@ -429,6 +434,7 @@ exit 0
 %{_bindir}/lscpu
 %{_bindir}/lsipc
 %{_bindir}/lslogins
+%{_bindir}/lsmem
 %{_bindir}/lsns
 /bin/mountpoint
 %{_bindir}/mesg
@@ -454,6 +460,7 @@ exit 0
 /sbin/wipefs
 %{_bindir}/ipcmk
 %{_bindir}/fallocate
+%{_bindir}/fincore
 %{_bindir}/unshare
 
 %ifnarch %no_cfsfdisk_archs
@@ -483,8 +490,10 @@ exit 0
 %{_bindir}/colcrt
 %{_bindir}/colrm
 %{_bindir}/column
+%{_bindir}/chmem
 %{_sbindir}/fdformat
 %{_sbindir}/resizepart
+%{_sbindir}/rfkill
 %{_bindir}/flock
 %{_bindir}/getopt
 %{_bindir}/hexdump
@@ -508,9 +517,9 @@ exit 0
 %{_bindir}/setarch
 %{_bindir}/setsid
 %{_bindir}/setterm
-%{_bindir}/tailf
 %{_bindir}/ul
 %{_bindir}/uuidgen
+%{_bindir}/uuidparse
 %{_bindir}/eject
 %{_bindir}/lslocks
 %{_bindir}/utmpdump
