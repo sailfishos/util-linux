@@ -20,7 +20,7 @@
 - Do not require Consolekit-libs
 - Dont provide ourselves
 
-* Fri Jul 04 2011 Yan Li <yan.i.li@intel.com> - 2.19.1
+* Mon Jul 04 2011 Yan Li <yan.i.li@intel.com> - 2.19.1
 - Revert which to 2.17 (BMC#11589)
 
 * Tue Jun 28 2011 Chris Ferron <chris.e.ferron@linux.intel.com> - 2.19.1
