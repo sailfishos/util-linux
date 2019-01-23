@@ -349,11 +349,12 @@ mv %{buildroot}%{_docdir}/util-linux/getopt \
 rmdir %{buildroot}%{_docdir}/util-linux
 
 # create list of setarch(8) symlinks
-rm -f documentation.list
+rm -f symlinks.list
 find  %{buildroot}%{_bindir}/ -type l \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
-	| sed 's|^'%{buildroot}'||' >> documentation.list
+	| sed 's|^'%{buildroot}'||' >> symlinks.list
 
+rm -f documentation.list
 find  %{buildroot}%{_mandir}/man8 \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
 	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
@@ -411,7 +412,7 @@ exit 0
 
 %lang_package
 
-%files
+%files -f symlinks.list
 %defattr(-,root,root)
 %license Documentation/licenses/*
 
