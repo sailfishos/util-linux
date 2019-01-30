@@ -74,7 +74,6 @@ License: LGPLv2+
 %description -n libsmartcols
 This is library for ls-like terminal programs, part of util-linux.
 
-
 %package -n libsmartcols-devel
 Summary: Formatting library for ls-like programs.
 Group: Development/Libraries
@@ -194,6 +193,15 @@ The uuidd package contains a userspace daemon (uuidd) which guarantees
 uniqueness of time-based UUID generation even at very high rates on
 SMP systems.
 
+%package doc
+Summary:   Documentation for %{name}
+Group:     Documentation
+Requires:  %{name} = %{version}-%{release}
+Obsoletes: %{name}-docs
+
+%description doc
+Man and info pages for %{name}.
+
 
 %prep
 %setup -q -n %{name}-%{version}/%{name}
@@ -294,11 +302,6 @@ for I in floppy-%{floppyver}/README.html; do
 	rm -rf $I
 done
 
-# we install getopt-*.{bash,tcsh} by %doc directive
-chmod 644 misc-utils/getopt-*.{bash,tcsh}
-rm -f %{buildroot}%{_datadir}/doc/util-linux/getopt/*
-rmdir %{buildroot}%{_datadir}/doc/util-linux/getopt
-
 ln -sf ../../bin/kill %{buildroot}%{_bindir}/kill
 
 # /usr/sbin -> /sbin
@@ -330,22 +333,31 @@ ln -s /proc/self/mounts %{buildroot}/etc/mtab
 # which install
 cd which-%{whichver}
 %make_install
-mkdir -p %{buildroot}%{_defaultdocdir}/which
-install -m 0644 README    %{buildroot}%{_defaultdocdir}/which/
-install -m 0644 EXAMPLES  %{buildroot}%{_defaultdocdir}/which/
-install -m 0644 README.alias %{buildroot}%{_defaultdocdir}/which/
+mkdir -p %{buildroot}%{_docdir}/which-%{whichver}
+install -m0644 -t %{buildroot}%{_docdir}/which-%{whichver}/ \
+        README EXAMPLES README.alias
 
 rm -f %{buildroot}%{_infodir}/dir
 
 cd ../
-# create list of setarch(8) symlinks
-find  %{buildroot}%{_bindir}/ -regextype posix-egrep -type l \
-	-regex ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
-	-printf "%{_bindir}/%f\n" >> documentation.list
 
-find  %{buildroot}%{_mandir}/man8 -regextype posix-egrep  \
-	-regex ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
-	-printf "%{_mandir}/man8/%f*\n" >> documentation.list
+mkdir -p %{buildroot}%{_docdir}/%{name}-%{version}
+install -m0644 -t %{buildroot}%{_docdir}/%{name}-%{version} \
+        AUTHORS README NEWS
+mv %{buildroot}%{_docdir}/util-linux/getopt \
+   %{buildroot}%{_docdir}/%{name}-%{version}/getopt
+rmdir %{buildroot}%{_docdir}/util-linux
+
+# create list of setarch(8) symlinks
+rm -f symlinks.list
+find  %{buildroot}%{_bindir}/ -type l \
+	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
+	| sed 's|^'%{buildroot}'||' >> symlinks.list
+
+rm -f documentation.list
+find  %{buildroot}%{_mandir}/man8 \
+	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
+	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
 
 mv %{buildroot}%{_bindir}/rfkill %{buildroot}%{_sbindir}
 
@@ -400,11 +412,9 @@ exit 0
 
 %lang_package
 
-%docs_package
-
-%files
+%files -f symlinks.list
 %defattr(-,root,root)
-%doc AUTHORS Documentation/licenses/*
+%license Documentation/licenses/*
 
 %config(noreplace)	%{_sysconfdir}/pam.d/chfn
 %config(noreplace)	%{_sysconfdir}/pam.d/chsh
@@ -442,8 +452,6 @@ exit 0
 %{_bindir}/nsenter
 %{_bindir}/prlimit
 %{_bindir}/uname26
-
-%{_defaultdocdir}/which/
 
 %{_bindir}/which
 
@@ -539,14 +547,14 @@ exit 0
 
 %files -n uuidd
 %defattr(-,root,root)
-%doc Documentation/licenses/COPYING.GPLv2
+%license Documentation/licenses/COPYING.GPLv2
 %attr(-, uuidd, uuidd) %{_sbindir}/uuidd
 %dir %attr(2775, uuidd, uuidd) /var/lib/libuuid
 %dir %attr(2775, uuidd, uuidd) /var/run/uuidd
 
 %files -n libsmartcols
 %defattr(-,root,root)
-%doc Documentation/licenses/COPYING.LGPLv2.1 libsmartcols/COPYING
+%license Documentation/licenses/COPYING.LGPLv2.1 libsmartcols/COPYING
 %{_libdir}/libsmartcols.so.*
 
 %files -n libsmartcols-devel
@@ -557,7 +565,7 @@ exit 0
 
 %files -n libmount
 %defattr(-,root,root)
-%doc libmount/COPYING
+%license libmount/COPYING
 %{_libdir}/libmount.so.*
 
 %files -n libmount-devel
@@ -568,20 +576,18 @@ exit 0
 
 %files -n libblkid
 %defattr(-,root,root)
-%doc libblkid/COPYING
+%license libblkid/COPYING
 %{_libdir}/libblkid.so.*
 
 %files -n libblkid-devel
 %defattr(-,root,root)
-%doc libblkid/COPYING
 %{_libdir}/libblkid.so
 %{_includedir}/blkid
-%{_mandir}/man3/libblkid.3*
 %{_libdir}/pkgconfig/blkid.pc
 
 %files -n libfdisk
 %defattr(-,root,root)
-%doc libfdisk/COPYING
+%license libfdisk/COPYING
 %{_libdir}/libfdisk.so.*
 
 %files -n libfdisk-devel
@@ -592,13 +598,16 @@ exit 0
 
 %files -n libuuid
 %defattr(-,root,root)
-%doc libuuid/COPYING
+%license libuuid/COPYING
 %{_libdir}/libuuid.so.*
 
 %files -n libuuid-devel
 %defattr(-,root,root)
-%doc libuuid/COPYING
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
 
+%files doc -f documentation.list
+%defattr(-,root,root)
+%{_docdir}/which-%{whichver}
+%{_docdir}/%{name}-%{version}
