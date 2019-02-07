@@ -8,7 +8,6 @@ Url:            http://kernel.org/~kzak/util-linux/
 Group:          System/Base
 
 ### Macros
-%define whichver 2.17
 %define no_cfsfdisk_archs sparc sparcv9 sparc64
 
 BuildRequires:  libtool
@@ -29,7 +28,6 @@ Source1:        util-linux-login.pamd
 Source2:        util-linux-remote.pamd
 Source3:        util-linux-chsh-chfn.pamd
 Source4:        util-linux-60-raw.rules
-Source10:       http://ftp.gnu.org/gnu/which/which-%{whichver}.tar.gz
 Source11:       util-linux-su.pamd
 Source12:       util-linux-su-l.pamd
 Source14:       util-linux-runuser.pamd
@@ -45,8 +43,6 @@ Conflicts: filesystem < 3
 
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
-Obsoletes:      which
-Provides:       which
 Provides:       mount
 Requires: libuuid = %{version}-%{release}
 Requires: libblkid = %{version}-%{release}
@@ -211,7 +207,6 @@ Man and info pages for %{name}.
 # the version here.
 echo %{version} | cut -d '+' -f 1 > .tarball-version
 
-tar xf %{SOURCE10}
 unset LINGUAS || :
 
 export CFLAGS="-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 %{optflags}"
@@ -234,12 +229,6 @@ export SUID_LDFLAGS="-pie"
 
 # build util-linux
 make %{?_smp_mflags}
-
-cd which-%{whichver}
-%configure
-
-make %{?_smp_mflags}
-
 
 %install
 rm -rf %{buildroot}
@@ -330,16 +319,7 @@ ln -s /proc/self/mounts %{buildroot}/etc/mtab
 # find MO files
 %find_lang %{name}
 
-# which install
-cd which-%{whichver}
-%make_install
-mkdir -p %{buildroot}%{_docdir}/which-%{whichver}
-install -m0644 -t %{buildroot}%{_docdir}/which-%{whichver}/ \
-        README EXAMPLES README.alias
-
 rm -f %{buildroot}%{_infodir}/dir
-
-cd ../
 
 mkdir -p %{buildroot}%{_docdir}/%{name}-%{version}
 install -m0644 -t %{buildroot}%{_docdir}/%{name}-%{version} \
@@ -450,8 +430,6 @@ exit 0
 %{_bindir}/nsenter
 %{_bindir}/prlimit
 %{_bindir}/uname26
-
-%{_bindir}/which
 
 /sbin/agetty
 /sbin/blkdiscard
@@ -608,5 +586,4 @@ exit 0
 
 %files doc -f documentation.list
 %defattr(-,root,root)
-%{_docdir}/which-%{whichver}
 %{_docdir}/%{name}-%{version}
