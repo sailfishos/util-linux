@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.31
+Version:        2.33
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -182,7 +182,7 @@ across a network.
 See also the "uuid-devel" package, which is a separate implementation.
 
 %package -n uuidd
-License:        GPLv2
+License:        GPLv2+
 Summary:        Helper daemon to guarantee uniqueness of time-based UUIDs
 Group:          System/Daemons
 Requires:       libuuid = %{version}-%{release}
@@ -358,8 +358,6 @@ rm -f documentation.list
 find  %{buildroot}%{_mandir}/man8 \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
 	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
-
-mv %{buildroot}%{_bindir}/rfkill %{buildroot}%{_sbindir}
 
 %post
 # NOTE: /var/log/lastlog is owned (%ghost) by setup package
@@ -544,17 +542,18 @@ exit 0
 /sbin/blkid
 /sbin/findfs
 /sbin/zramctl
+%{_bindir}/choom
 
 %files -n uuidd
 %defattr(-,root,root)
-%license Documentation/licenses/COPYING.GPLv2
+%license Documentation/licenses/COPYING.GPL-2.0-or-later
 %attr(-, uuidd, uuidd) %{_sbindir}/uuidd
 %dir %attr(2775, uuidd, uuidd) /var/lib/libuuid
 %dir %attr(2775, uuidd, uuidd) /var/run/uuidd
 
 %files -n libsmartcols
 %defattr(-,root,root)
-%license Documentation/licenses/COPYING.LGPLv2.1 libsmartcols/COPYING
+%license Documentation/licenses/COPYING.LGPL-2.1-or-later libsmartcols/COPYING
 %{_libdir}/libsmartcols.so.*
 
 %files -n libsmartcols-devel
