@@ -215,8 +215,8 @@ export SUID_LDFLAGS="-pie"
 ./autogen.sh
 %configure \
 	--with-systemdsystemunitdir=no \
-	--bindir=/bin \
-	--sbindir=/sbin \
+	--bindir=/usr/bin \
+	--sbindir=/usr/sbin \
 	--disable-wall \
 	--enable-partx \
 	--enable-kill \
@@ -232,7 +232,6 @@ make %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/{bin,sbin}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_infodir}
 mkdir -p %{buildroot}%{_mandir}/man{1,6,8,5}
@@ -257,8 +256,7 @@ mkdir -p %{buildroot}%{_localstatedir}/log
 	popd
 }
 
-ln -sf ../../sbin/hwclock %{buildroot}%{_sbindir}/hwclock
-ln -sf hwclock %{buildroot}/sbin/clock
+ln -sf %{_sbindir}/hwclock %{buildroot}%{_sbindir}/clock
 
 # And a dirs uuidd needs that the makefiles don't create
 install -d %{buildroot}%{_localstatedir}/run/uuidd
@@ -274,7 +272,7 @@ rm -f %{buildroot}/%{_lib}/libblkid.so
 #ln -sf ../../%{_lib}/libblkid.so.1 %{buildroot}%{_libdir}/libblkid.so
 
 # deprecated commands
-for I in /sbin/mkfs.bfs /usr/sbin/sln \
+for I in /usr/sbin/mkfs.bfs /usr/sbin/sln \
 	/usr/bin/chkdupexe %{_bindir}/line %{_bindir}/pg %{_bindir}/newgrp \
 	/usr/sbin/shutdown /usr/sbin/vipw /usr/sbin/vigr; do
 	rm -f $RPM_BUILD_ROOT$I
@@ -291,26 +289,10 @@ for I in floppy-%{floppyver}/README.html; do
 	rm -rf $I
 done
 
-ln -sf ../../bin/kill %{buildroot}%{_bindir}/kill
-
-# /usr/sbin -> /sbin
-for I in addpart delpart partx; do
-	if [ -e %{buildroot}%{_sbindir}/$I ]; then
-		mv %{buildroot}%{_sbindir}/$I %{buildroot}/sbin/$I
-	fi
-done
-
-# /usr/bin -> /bin
-for I in taskset; do
-	if [ -e %{buildroot}%{_bindir}/$I ]; then
-		mv %{buildroot}%{_bindir}/$I %{buildroot}/bin/$I
-	fi
-done
-
-# /sbin -> /bin
+# /usr/sbin -> /usr/bin
 for I in raw; do
-	if [ -e %{buildroot}/sbin/$I ]; then
-		mv %{buildroot}/sbin/$I %{buildroot}/bin/$I
+	if [ -e %{buildroot}%{_sbindir}/$I ]; then
+		mv %{buildroot}%{_sbindir}/$I %{buildroot}%{_bindir}/$I
 	fi
 done
 
@@ -405,67 +387,66 @@ exit 0
 
 %ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/mtab
 
-/bin/dmesg
-%attr(4755,root,root)	/bin/mount
-%attr(4755,root,root)	/bin/umount
-%attr(4755,root,root)	/bin/su
-%attr(755,root,root)	/bin/login
+%{_bindir}/dmesg
+%attr(4755,root,root)	%{_bindir}/mount
+%attr(4755,root,root)	%{_bindir}/umount
+%attr(4755,root,root)	%{_bindir}/su
+%attr(755,root,root)	%{_bindir}/login
 %attr(4711,root,root)	%{_bindir}/chfn
 %attr(4711,root,root)	%{_bindir}/chsh
 %attr(2755,root,tty)	%{_bindir}/write
-/bin/more
-/bin/kill
+%{_bindir}/more
+%{_bindir}/kill
 %{_bindir}/last
 %{_bindir}/lastb
-/bin/taskset
-/bin/findmnt
-/bin/lsblk
+%{_bindir}/taskset
+%{_bindir}/findmnt
+%{_bindir}/lsblk
 %{_bindir}/lscpu
 %{_bindir}/lsipc
 %{_bindir}/lslogins
 %{_bindir}/lsmem
 %{_bindir}/lsns
-/bin/mountpoint
+%{_bindir}/mountpoint
 %{_bindir}/mesg
 %{_bindir}/nsenter
 %{_bindir}/prlimit
 %{_bindir}/uname26
 
-/sbin/agetty
-/sbin/blkdiscard
-/sbin/blockdev
-/sbin/pivot_root
-/sbin/ctrlaltdel
-/sbin/addpart
-/sbin/delpart
-/sbin/partx
-/sbin/fsfreeze
-/sbin/fstrim
-/sbin/swaplabel
-/sbin/wipefs
+%{_sbindir}/agetty
+%{_sbindir}/blkdiscard
+%{_sbindir}/blockdev
+%{_sbindir}/pivot_root
+%{_sbindir}/ctrlaltdel
+%{_sbindir}/addpart
+%{_sbindir}/delpart
+%{_sbindir}/partx
+%{_sbindir}/fsfreeze
+%{_sbindir}/fstrim
+%{_sbindir}/swaplabel
+%{_sbindir}/wipefs
 %{_bindir}/ipcmk
 %{_bindir}/fallocate
 %{_bindir}/fincore
 %{_bindir}/unshare
 
 %ifnarch %no_cfsfdisk_archs
-/sbin/sfdisk
-/sbin/cfdisk
+%{_sbindir}/sfdisk
+%{_sbindir}/cfdisk
 %endif
 
-/bin/raw
-/bin/wdctl
-/sbin/chcpu
-/sbin/fdisk
-/sbin/clock
-/sbin/hwclock
+%{_bindir}/raw
+%{_bindir}/wdctl
+%{_sbindir}/chcpu
+%{_sbindir}/fdisk
+%{_sbindir}/clock
 %{_sbindir}/hwclock
-/sbin/mkfs
-/sbin/mkfs.minix
-/sbin/mkswap
-/sbin/nologin
-/sbin/runuser
-/sbin/sulogin
+%{_sbindir}/mkfs
+%{_sbindir}/mkfs.minix
+%{_sbindir}/mkswap
+%{_sbindir}/nologin
+%{_sbindir}/runuser
+%{_sbindir}/sulogin
 
 %{_bindir}/chrt
 %{_bindir}/ionice
@@ -485,14 +466,13 @@ exit 0
 %{_bindir}/ipcrm
 %{_bindir}/ipcs
 %{_bindir}/isosize
-%{_bindir}/kill
 %{_bindir}/logger
 %{_bindir}/look
 %{_bindir}/mcookie
-/sbin/fsck
-/sbin/fsck.cramfs
-/sbin/fsck.minix
-/sbin/mkfs.cramfs
+%{_sbindir}/fsck
+%{_sbindir}/fsck.cramfs
+%{_sbindir}/fsck.minix
+%{_sbindir}/mkfs.cramfs
 %{_bindir}/namei
 %{_bindir}/rename
 %{_bindir}/renice
@@ -513,13 +493,13 @@ exit 0
 %{_sbindir}/readprofile
 %{_sbindir}/rtcwake
 %{_sbindir}/ldattach
-/sbin/swapon
-/sbin/swapoff
-/sbin/switch_root
-/sbin/losetup
-/sbin/blkid
-/sbin/findfs
-/sbin/zramctl
+%{_sbindir}/swapon
+%{_sbindir}/swapoff
+%{_sbindir}/switch_root
+%{_sbindir}/losetup
+%{_sbindir}/blkid
+%{_sbindir}/findfs
+%{_sbindir}/zramctl
 %{_bindir}/choom
 
 %files -n uuidd
