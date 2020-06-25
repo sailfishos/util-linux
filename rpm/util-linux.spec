@@ -13,7 +13,7 @@ Group:          System/Base
 BuildRequires:  libtool
 BuildRequires:  gettext-devel
 BuildRequires:  pam-devel
-BuildRequires:  texinfo
+
 ### Dependences
 BuildRequires:  pkgconfig(ext2fs) >= 1.36
 BuildRequires:  pkgconfig(ncurses)
