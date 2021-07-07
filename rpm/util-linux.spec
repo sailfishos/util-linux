@@ -235,7 +235,7 @@ rm -rf %{buildroot}
 mkdir -p %{buildroot}/{bin,sbin}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_infodir}
-mkdir -p %{buildroot}%{_mandir}/man{1,6,8,5}
+#mkdir -p %{buildroot}%{_mandir}/man{1,6,8,5}
 mkdir -p %{buildroot}%{_sbindir}
 mkdir -p %{buildroot}%{_sysconfdir}/{pam.d,security/console.apps,blkid}
 mkdir -p %{buildroot}%{_localstatedir}/log
@@ -339,6 +339,9 @@ find  %{buildroot}%{_mandir}/man8 \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
 	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
 
+#remove all manpages ;)
+rm -rf $RPM_BUILD_ROOT%{_mandir}/*
+
 %post
 # NOTE: /var/log/lastlog is owned (%ghost) by setup package
 # however it is created here as setup can not depend on the packages
@@ -434,6 +437,7 @@ exit 0
 /sbin/agetty
 /sbin/blkdiscard
 /sbin/blockdev
+/sbin/blkzone
 /sbin/pivot_root
 /sbin/ctrlaltdel
 /sbin/addpart
