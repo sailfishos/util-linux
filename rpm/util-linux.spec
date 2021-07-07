@@ -589,6 +589,6 @@ exit 0
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
 
-%files doc -f documentation.list
+%files doc
 %defattr(-,root,root)
 %{_docdir}/%{name}-%{version}
