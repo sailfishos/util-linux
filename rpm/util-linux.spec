@@ -335,9 +335,10 @@ find  %{buildroot}%{_bindir}/ -type l \
 	| sed 's|^'%{buildroot}'||' >> symlinks.list
 
 rm -f documentation.list
-find  %{buildroot}%{_mandir}/man8 \
-	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
-	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
+echo -n '' >> documentation.list
+#find  %{buildroot}%{_mandir}/man8 \
+#	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
+#	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
 
 #remove all manpages ;)
 rm -rf $RPM_BUILD_ROOT%{_mandir}/*
