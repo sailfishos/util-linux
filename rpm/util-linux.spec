@@ -387,7 +387,6 @@ for I in /etc/blkid.tab /etc/blkid.tab.old \
 	fi
 done
 
-
 %postun -n libblkid -p /sbin/ldconfig
 
 %post -n libfdisk -p /sbin/ldconfig
