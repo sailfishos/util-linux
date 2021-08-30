@@ -18,6 +18,7 @@ BuildRequires:  texinfo
 BuildRequires:  pkgconfig(ext2fs) >= 1.36
 BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(popt)
+BuildRequires:  pkgconfig(systemd)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  libutempter-devel
 BuildRequires:  bison
@@ -203,7 +204,6 @@ Summary:   Systemd unit files for %{name}
 Group:     System
 Requires:  %{name} = %{version}-%{release}
 Requires(post): systemd
-BuildRequires:  systemd-devel
 
 %description systemd-fstrim
 Systemd unit files for fstrim
@@ -214,7 +214,6 @@ Group:     System
 Requires:  %{name} = %{version}-%{release}
 Requires:  uuidd
 Requires(post): systemd
-BuildRequires:  systemd-devel
 
 %description systemd-uuidd
 Systemd unit files for uuidd
