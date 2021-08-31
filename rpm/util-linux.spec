@@ -216,7 +216,7 @@ Requires:  uuidd
 Requires(post): systemd
 
 %description systemd-uuidd
-Systemd unit files for uuidd
+Systemd unit files for uuidd.
 
 %prep
 %setup -q -n %{name}-%{version}/%{name}
