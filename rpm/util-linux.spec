@@ -18,6 +18,7 @@ BuildRequires:  texinfo
 BuildRequires:  pkgconfig(ext2fs) >= 1.36
 BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(popt)
+BuildRequires:  pkgconfig(systemd)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  libutempter-devel
 BuildRequires:  bison
@@ -198,6 +199,22 @@ Obsoletes: %{name}-docs
 %description doc
 Man and info pages for %{name}.
 
+%package systemd-fstrim
+Summary:   Systemd unit files for %{name}
+Requires:  %{name} = %{version}-%{release}
+Requires(post): systemd
+
+%description systemd-fstrim
+Systemd unit files for fstrim.
+
+%package systemd-uuidd
+Summary:   Systemd unit files for %{name}
+Requires:  %{name} = %{version}-%{release}
+Requires:  uuidd
+Requires(post): systemd
+
+%description systemd-uuidd
+Systemd unit files for uuidd.
 
 %prep
 %setup -q -n %{name}-%{version}/%{name}
@@ -214,7 +231,8 @@ export SUID_CFLAGS="-fpie"
 export SUID_LDFLAGS="-pie"
 ./autogen.sh
 %configure \
-	--with-systemdsystemunitdir=no \
+	--with-systemdsystemunitdir=%{_unitdir} \
+	--with-systemd \
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--disable-wall \
@@ -380,6 +398,18 @@ done
 
 %post -n libsmartcols -p /sbin/ldconfig
 %postun -n libsmartcols -p /sbin/ldconfig
+
+%post systemd-fstrim
+%systemd_post fstrim.timer
+
+%preun systemd-fstrim
+%systemd_preun fstrim.timer
+
+%post systemd-uuidd
+%systemd_post uuidd.service
+
+%preun systemd-uuidd
+%systemd_preun uuidd.service
 
 %pre -n uuidd
 getent group uuidd >/dev/null || groupadd -r uuidd
@@ -587,3 +617,13 @@ exit 0
 %files doc -f documentation.list
 %defattr(-,root,root)
 %{_docdir}/%{name}-%{version}
+
+%files systemd-fstrim
+%defattr(-,root,root)
+%{_unitdir}/fstrim.service
+%{_unitdir}/fstrim.timer
+
+%files systemd-uuidd
+%defattr(-,root,root)
+%{_unitdir}/uuidd.service
+%{_unitdir}/uuidd.socket
