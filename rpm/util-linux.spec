@@ -206,7 +206,7 @@ Requires:  %{name} = %{version}-%{release}
 Requires(post): systemd
 
 %description systemd-fstrim
-Systemd unit files for fstrim
+Systemd unit files for fstrim.
 
 %package systemd-uuidd
 Summary:   Systemd unit files for %{name}
