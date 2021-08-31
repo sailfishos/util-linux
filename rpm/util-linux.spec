@@ -201,7 +201,6 @@ Man and info pages for %{name}.
 
 %package systemd-fstrim
 Summary:   Systemd unit files for %{name}
-Group:     System
 Requires:  %{name} = %{version}-%{release}
 Requires(post): systemd
 
@@ -210,7 +209,6 @@ Systemd unit files for fstrim.
 
 %package systemd-uuidd
 Summary:   Systemd unit files for %{name}
-Group:     System
 Requires:  %{name} = %{version}-%{release}
 Requires:  uuidd
 Requires(post): systemd
