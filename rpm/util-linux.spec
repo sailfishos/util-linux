@@ -18,6 +18,7 @@ BuildRequires:  pkgconfig(ext2fs) >= 1.36
 BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
+BuildRequires:  pkgconfig(libcrypt)
 BuildRequires:  libutempter-devel
 BuildRequires:  bison
 
