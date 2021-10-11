@@ -5,7 +5,6 @@ Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
 Url:            http://kernel.org/~kzak/util-linux/
-Group:          System/Base
 
 ### Macros
 %define no_cfsfdisk_archs sparc sparcv9 sparc64
@@ -19,6 +18,7 @@ BuildRequires:  pkgconfig(ext2fs) >= 1.36
 BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
+BuildRequires:  pkgconfig(libcrypt)
 BuildRequires:  libutempter-devel
 BuildRequires:  bison
 
@@ -64,7 +64,6 @@ program.
 
 %package -n libsmartcols
 Summary: Formatting library for ls-like programs.
-Group: Development/Libraries
 License: LGPLv2+
 
 %description -n libsmartcols
@@ -72,7 +71,6 @@ This is library for ls-like terminal programs, part of util-linux.
 
 %package -n libsmartcols-devel
 Summary: Formatting library for ls-like programs.
-Group: Development/Libraries
 License: LGPLv2+
 Requires: libsmartcols = %{version}-%{release}
 Requires: pkgconfig
@@ -83,7 +81,6 @@ part of util-linux.
 
 %package -n libmount
 Summary: Device mounting library
-Group: Development/Libraries
 License: LGPLv2+
 Requires: libblkid = %{version}-%{release}
 Requires: libuuid = %{version}-%{release}
@@ -94,7 +91,6 @@ This is the device mounting library, part of util-linux.
 
 %package -n libmount-devel
 Summary: Device mounting library
-Group: Development/Libraries
 License: LGPLv2+
 Requires: libmount = %{version}-%{release}
 
@@ -105,7 +101,6 @@ part of util-linux.
 %package -n libblkid
 License:        LGPLv2+
 Summary:        Block device ID library
-Group:          System/Libraries
 Requires:       libuuid = %{version}-%{release}
 Requires(post): coreutils
 
@@ -115,7 +110,6 @@ This is block device identification library, part of util-linux.
 %package -n libblkid-devel
 License:        LGPLv2+
 Summary:        Block device ID library
-Group:          Development/Libraries
 Requires:       libblkid = %{version}
 
 %description -n libblkid-devel
@@ -124,7 +118,6 @@ part of util-linux.
 
 %package -n libfdisk
 Summary: Partitioning library for fdisk-like programs.
-Group: Development/Libraries
 License: LGPLv2+
 
 %description -n libfdisk
@@ -132,7 +125,6 @@ This is library for fdisk-like programs, part of util-linux.
 
 %package -n libfdisk-devel
 Summary:  Partitioning library for fdisk-like programs.
-Group: Development/Libraries
 License: LGPLv2+
 Requires: libfdisk = %{version}-%{release}
 
@@ -143,7 +135,7 @@ part of util-linux.
 %package -n libuuid
 License:        BSD
 Summary:        Universally unique ID library
-Group:          System/Libraries
+
 
 %description -n libuuid
 This is the universally unique ID library, part of e2fsprogs.
@@ -160,7 +152,6 @@ See also the "uuid" package, which is a separate implementation.
 %package -n libuuid-devel
 License:        BSD
 Summary:        Universally unique ID library
-Group:          Development/Libraries
 Requires:       libuuid = %{version}-%{release}
 Provides:       libuuid-static = %{version}-%{release}
 
@@ -180,7 +171,6 @@ See also the "uuid-devel" package, which is a separate implementation.
 %package -n uuidd
 License:        GPLv2+
 Summary:        Helper daemon to guarantee uniqueness of time-based UUIDs
-Group:          System/Daemons
 Requires:       libuuid = %{version}-%{release}
 Requires(pre): shadow-utils
 
@@ -191,7 +181,6 @@ SMP systems.
 
 %package doc
 Summary:   Documentation for %{name}
-Group:     Documentation
 Requires:  %{name} = %{version}-%{release}
 Obsoletes: %{name}-docs
 
