@@ -4,7 +4,7 @@ Version:        2.33
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
-Url:            http://kernel.org/~kzak/util-linux/
+Url:            https://github.com/sailfishos/util-linux
 
 ### Macros
 %define no_cfsfdisk_archs sparc sparcv9 sparc64
