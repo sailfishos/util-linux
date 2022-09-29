@@ -1,21 +1,16 @@
 ### Header
 Name:           util-linux
-Version:        2.33
+Version:        2.38.1
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
 Url:            https://github.com/sailfishos/util-linux
-
-### Macros
-%define no_cfsfdisk_archs sparc sparcv9 sparc64
-
 BuildRequires:  libtool
 BuildRequires:  gettext-devel
 BuildRequires:  pam-devel
 BuildRequires:  texinfo
-### Dependences
 BuildRequires:  pkgconfig(ext2fs) >= 1.36
-BuildRequires:  pkgconfig(ncurses)
+BuildRequires:  pkgconfig(ncursesw)
 BuildRequires:  pkgconfig(popt)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libcrypt)
@@ -34,12 +29,9 @@ Source14:       util-linux-runuser.pamd
 Source15:       util-linux-runuser-l.pamd
 
 ### Obsoletes & Conflicts & Provides
-# old versions of e2fsprogs contain fsck, uuidgen
-Conflicts: e2fsprogs <= 1.42.2
-# rename from util-linux-ng back to util-linux
-Obsoletes: util-linux-ng <= 2.20.1
-Provides: util-linux-ng = %{version}-%{release}
-Conflicts: filesystem < 3
+# docs no longer generated due to needing lots of dependencies via rubygem-asciidoctor
+Obsoletes: util-linux-doc <= 2.38.1
+Provides: util-linux-doc = %{version}-%{release}
 
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
@@ -84,7 +76,6 @@ Summary: Device mounting library
 License: LGPLv2+
 Requires: libblkid = %{version}-%{release}
 Requires: libuuid = %{version}-%{release}
-Conflicts: filesystem < 3
 
 %description -n libmount
 This is the device mounting library, part of util-linux.
@@ -179,14 +170,6 @@ The uuidd package contains a userspace daemon (uuidd) which guarantees
 uniqueness of time-based UUID generation even at very high rates on
 SMP systems.
 
-%package doc
-Summary:   Documentation for %{name}
-Requires:  %{name} = %{version}-%{release}
-Obsoletes: %{name}-docs
-
-%description doc
-Man and info pages for %{name}.
-
 
 %prep
 %setup -q -n %{name}-%{version}/%{name}
@@ -206,6 +189,7 @@ export SUID_LDFLAGS="-pie"
 	--with-systemdsystemunitdir=no \
 	--bindir=/bin \
 	--sbindir=/sbin \
+	--disable-bfs \
 	--disable-wall \
 	--enable-partx \
 	--enable-kill \
@@ -217,10 +201,9 @@ export SUID_LDFLAGS="-pie"
 	--disable-makeinstall-chown
 
 # build util-linux
-make %{?_smp_mflags}
+%make_build
 
 %install
-rm -rf %{buildroot}
 mkdir -p %{buildroot}/{bin,sbin}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_infodir}
@@ -262,24 +245,6 @@ rm -f %{buildroot}/%{_lib}/libblkid.so
 #mv %{buildroot}/%{_lib}/libblkid.a %{buildroot}%{_libdir}/
 #ln -sf ../../%{_lib}/libblkid.so.1 %{buildroot}%{_libdir}/libblkid.so
 
-# deprecated commands
-for I in /sbin/mkfs.bfs /usr/sbin/sln \
-	/usr/bin/chkdupexe %{_bindir}/line %{_bindir}/pg %{_bindir}/newgrp \
-	/usr/sbin/shutdown /usr/sbin/vipw /usr/sbin/vigr; do
-	rm -f $RPM_BUILD_ROOT$I
-done
-
-# deprecated man pages
-for I in man1/chkdupexe.1 man1/line.1 man1/pg.1 man1/newgrp.1 \
-	man8/mkfs.bfs.8 man8/vipw.8 man8/vigr; do
-	rm -rf $RPM_BUILD_ROOT%{_mandir}/${I}*
-done
-
-# deprecated docs
-for I in floppy-%{floppyver}/README.html; do
-	rm -rf $I
-done
-
 ln -sf ../../bin/kill %{buildroot}%{_bindir}/kill
 
 # /usr/sbin -> /sbin
@@ -303,19 +268,15 @@ for I in raw; do
 	fi
 done
 
-ln -s /proc/self/mounts %{buildroot}/etc/mtab
+ln -s ../proc/self/mounts %{buildroot}/etc/mtab
 
 # find MO files
 %find_lang %{name}
 
 rm -f %{buildroot}%{_infodir}/dir
 
-mkdir -p %{buildroot}%{_docdir}/%{name}-%{version}
-install -m0644 -t %{buildroot}%{_docdir}/%{name}-%{version} \
-        AUTHORS README NEWS
-mv %{buildroot}%{_docdir}/util-linux/getopt \
-   %{buildroot}%{_docdir}/%{name}-%{version}/getopt
-rmdir %{buildroot}%{_docdir}/util-linux
+# remove the random getopt usage example files
+rm -f ${RPM_BUILD_ROOT}%{_datadir}/doc/util-linux/getopt*
 
 # create list of setarch(8) symlinks
 rm -f symlinks.list
@@ -323,10 +284,6 @@ find  %{buildroot}%{_bindir}/ -type l \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
 	| sed 's|^'%{buildroot}'||' >> symlinks.list
 
-rm -f documentation.list
-find  %{buildroot}%{_mandir}/man8 \
-	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)\.8.*" \
-	| sed -e 's|^'%{buildroot}'||' -e 's/$/*/' >> documentation.list
 
 %post
 # NOTE: /var/log/lastlog is owned (%ghost) by setup package
@@ -338,10 +295,6 @@ touch /var/log/lastlog
 chown root:root /var/log/lastlog
 chmod 0644 /var/log/lastlog
 /sbin/ldconfig
-
-# Make sure mtab points to right place.
-rm -f /etc/mtab
-ln -s /proc/self/mounts /etc/mtab
 
 %post -n libblkid
 /sbin/ldconfig
@@ -392,8 +345,6 @@ exit 0
 %config(noreplace)      %{_sysconfdir}/pam.d/runuser
 %config(noreplace)      %{_sysconfdir}/pam.d/runuser-l
 
-%ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/mtab
-
 /bin/dmesg
 %attr(4755,root,root)	/bin/mount
 %attr(4755,root,root)	/bin/umount
@@ -411,6 +362,7 @@ exit 0
 /bin/lsblk
 %{_bindir}/lscpu
 %{_bindir}/lsipc
+%{_bindir}/lsirq
 %{_bindir}/lslogins
 %{_bindir}/lsmem
 %{_bindir}/lsns
@@ -436,11 +388,8 @@ exit 0
 %{_bindir}/fallocate
 %{_bindir}/fincore
 %{_bindir}/unshare
-
-%ifnarch %no_cfsfdisk_archs
 /sbin/sfdisk
 /sbin/cfdisk
-%endif
 
 /bin/raw
 /bin/wdctl
@@ -458,14 +407,13 @@ exit 0
 
 %{_bindir}/chrt
 %{_bindir}/ionice
-
+%{_bindir}/hardlink
 %{_bindir}/cal
 %{_bindir}/col
 %{_bindir}/colcrt
 %{_bindir}/colrm
 %{_bindir}/column
 %{_bindir}/chmem
-%{_sbindir}/fdformat
 %{_sbindir}/resizepart
 %{_sbindir}/rfkill
 %{_bindir}/flock
@@ -473,6 +421,7 @@ exit 0
 %{_bindir}/hexdump
 %{_bindir}/ipcrm
 %{_bindir}/ipcs
+%{_bindir}/irqtop
 %{_bindir}/isosize
 %{_bindir}/kill
 %{_bindir}/logger
@@ -487,10 +436,12 @@ exit 0
 %{_bindir}/renice
 %{_bindir}/rev
 %{_bindir}/script
+%{_bindir}/scriptlive
 %{_bindir}/scriptreplay
 %{_bindir}/setarch
 %{_bindir}/setsid
 %{_bindir}/setterm
+%{_bindir}/uclampset
 %{_bindir}/ul
 %{_bindir}/uuidgen
 %{_bindir}/uuidparse
@@ -510,6 +461,7 @@ exit 0
 /sbin/findfs
 /sbin/zramctl
 %{_bindir}/choom
+/etc/mtab
 
 %files -n uuidd
 %defattr(-,root,root)
@@ -572,7 +524,3 @@ exit 0
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
-
-%files doc -f documentation.list
-%defattr(-,root,root)
-%{_docdir}/%{name}-%{version}
