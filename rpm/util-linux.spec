@@ -170,6 +170,12 @@ The uuidd package contains a userspace daemon (uuidd) which guarantees
 uniqueness of time-based UUID generation even at very high rates on
 SMP systems.
 
+%package -n cfdisk
+License:        GPLv2+
+Summary:        cfdisk is a curses-based program for partitioning any block device
+
+%description -n cfdisk
+%{summary}.
 
 %prep
 %setup -q -n %{name}-%{version}/%{name}
@@ -389,7 +395,6 @@ exit 0
 %{_bindir}/fincore
 %{_bindir}/unshare
 /sbin/sfdisk
-/sbin/cfdisk
 
 /bin/raw
 /bin/wdctl
@@ -524,3 +529,7 @@ exit 0
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
+
+%files -n cfdisk
+%defattr(-,root,root)
+/sbin/cfdisk
