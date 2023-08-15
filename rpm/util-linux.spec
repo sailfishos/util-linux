@@ -28,6 +28,8 @@ Source12:       util-linux-su-l.pamd
 Source14:       util-linux-runuser.pamd
 Source15:       util-linux-runuser-l.pamd
 
+Patch0:         0001-libblkid-probe-Disable-CD-ROM-probing-in-blkid_probe.patch
+
 ### Obsoletes & Conflicts & Provides
 # docs no longer generated due to needing lots of dependencies via rubygem-asciidoctor
 Obsoletes: util-linux-doc <= 2.38.1
@@ -178,7 +180,7 @@ Summary:        cfdisk is a curses-based program for partitioning any block devi
 %{summary}.
 
 %prep
-%setup -q -n %{name}-%{version}/%{name}
+%autosetup -p1 -n %{name}-%{version}/%{name}
 
 %build
 # Because .git dir isn't included in tar_git, we explicitly state
