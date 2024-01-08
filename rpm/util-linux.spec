@@ -193,8 +193,8 @@ export SUID_LDFLAGS="-pie"
 ./autogen.sh
 %configure \
 	--with-systemdsystemunitdir=no \
-	--bindir=/bin \
-	--sbindir=/sbin \
+	--bindir=/usr/bin \
+	--sbindir=/usr/sbin \
 	--disable-bfs \
 	--disable-wall \
 	--enable-partx \
@@ -235,8 +235,7 @@ mkdir -p %{buildroot}%{_localstatedir}/log
 	popd
 }
 
-ln -sf ../../sbin/hwclock %{buildroot}%{_sbindir}/hwclock
-ln -sf hwclock %{buildroot}/sbin/clock
+ln -sf hwclock %{buildroot}/%{_sbindir}/clock
 
 # And a dirs uuidd needs that the makefiles don't create
 install -d %{buildroot}%{_localstatedir}/run/uuidd
@@ -251,30 +250,11 @@ rm -f %{buildroot}/%{_lib}/libblkid.so
 #mv %{buildroot}/%{_lib}/libblkid.a %{buildroot}%{_libdir}/
 #ln -sf ../../%{_lib}/libblkid.so.1 %{buildroot}%{_libdir}/libblkid.so
 
-ln -sf ../../bin/kill %{buildroot}%{_bindir}/kill
-
-# /usr/sbin -> /sbin
-for I in addpart delpart partx; do
-	if [ -e %{buildroot}%{_sbindir}/$I ]; then
-		mv %{buildroot}%{_sbindir}/$I %{buildroot}/sbin/$I
-	fi
-done
-
-# /usr/bin -> /bin
-for I in taskset; do
-	if [ -e %{buildroot}%{_bindir}/$I ]; then
-		mv %{buildroot}%{_bindir}/$I %{buildroot}/bin/$I
-	fi
-done
-
-# /sbin -> /bin
-for I in raw; do
-	if [ -e %{buildroot}/sbin/$I ]; then
-		mv %{buildroot}/sbin/$I %{buildroot}/bin/$I
-	fi
-done
 
 ln -s ../proc/self/mounts %{buildroot}/etc/mtab
+
+# remove static libs
+rm -f $RPM_BUILD_ROOT%{_libdir}/lib{uuid,blkid,mount,smartcols,fdisk}.a
 
 # find MO files
 %find_lang %{name}
@@ -289,6 +269,11 @@ rm -f symlinks.list
 find  %{buildroot}%{_bindir}/ -type l \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
 	| sed 's|^'%{buildroot}'||' >> symlinks.list
+
+# FIXME: Remove after UsrMove
+ln -sf %{_sbindir}/nologin %{buildroot}/sbin/nologin
+ln -sf %{_bindir}/su %{buildroot}/bin/su
+ln -sf %{_bindir}/mount %{buildroot}/bin/mount
 
 
 %post
@@ -332,7 +317,7 @@ done
 %pre -n uuidd
 getent group uuidd >/dev/null || groupadd -r uuidd
 getent passwd uuidd >/dev/null || \
-useradd -r -g uuidd -d /var/lib/libuuid -s /sbin/nologin \
+useradd -r -g uuidd -d /var/lib/libuuid -s %{_sbindir}/nologin \
     -c "UUID generator helper daemon" uuidd
 exit 0
 
@@ -351,64 +336,70 @@ exit 0
 %config(noreplace)      %{_sysconfdir}/pam.d/runuser
 %config(noreplace)      %{_sysconfdir}/pam.d/runuser-l
 
-/bin/dmesg
+%{_bindir}/dmesg
+%attr(4755,root,root)	%{_bindir}/mount
+# FIXME: Remove after UsrMove
 %attr(4755,root,root)	/bin/mount
-%attr(4755,root,root)	/bin/umount
+%attr(4755,root,root)	%{_bindir}/umount
+%attr(4755,root,root)	%{_bindir}/su
+# FIXME: Remove after UsrMove
 %attr(4755,root,root)	/bin/su
-%attr(755,root,root)	/bin/login
+%attr(755,root,root)	%{_bindir}/login
 %attr(4711,root,root)	%{_bindir}/chfn
 %attr(4711,root,root)	%{_bindir}/chsh
 %attr(2755,root,tty)	%{_bindir}/write
-/bin/more
-/bin/kill
+%{_bindir}/more
+%{_bindir}/kill
 %{_bindir}/last
 %{_bindir}/lastb
-/bin/taskset
-/bin/findmnt
-/bin/lsblk
+%{_bindir}/taskset
+%{_bindir}/findmnt
+%{_bindir}/lsblk
 %{_bindir}/lscpu
 %{_bindir}/lsipc
 %{_bindir}/lsirq
 %{_bindir}/lslogins
 %{_bindir}/lsmem
 %{_bindir}/lsns
-/bin/mountpoint
+%{_bindir}/mountpoint
 %{_bindir}/mesg
 %{_bindir}/nsenter
 %{_bindir}/prlimit
 %{_bindir}/uname26
 
-/sbin/agetty
-/sbin/blkdiscard
-/sbin/blockdev
-/sbin/pivot_root
-/sbin/ctrlaltdel
-/sbin/addpart
-/sbin/delpart
-/sbin/partx
-/sbin/fsfreeze
-/sbin/fstrim
-/sbin/swaplabel
-/sbin/wipefs
+%{_sbindir}/agetty
+%{_sbindir}/blkdiscard
+%{_sbindir}/blockdev
+%{_sbindir}/pivot_root
+%{_sbindir}/ctrlaltdel
+%{_sbindir}/addpart
+%{_sbindir}/delpart
+%{_sbindir}/partx
+%{_sbindir}/fsfreeze
+%{_sbindir}/fstrim
+%{_sbindir}/swaplabel
+%{_sbindir}/wipefs
 %{_bindir}/ipcmk
 %{_bindir}/fallocate
 %{_bindir}/fincore
 %{_bindir}/unshare
-/sbin/sfdisk
+%{_sbindir}/sfdisk
 
-/bin/raw
-/bin/wdctl
-/sbin/chcpu
-/sbin/fdisk
-/sbin/clock
-/sbin/hwclock
+%{_sbindir}/raw
+%{_bindir}/wdctl
+%{_sbindir}/chcpu
+%{_sbindir}/fdisk
+%{_sbindir}/clock
 %{_sbindir}/hwclock
-/sbin/mkfs
-/sbin/mkfs.minix
-/sbin/mkswap
+%{_sbindir}/hwclock
+%{_sbindir}/mkfs
+%{_sbindir}/mkfs.minix
+%{_sbindir}/mkswap
+# FIXME: Remove after UsrMove
 /sbin/nologin
-/sbin/runuser
-/sbin/sulogin
+%{_sbindir}/nologin
+%{_sbindir}/runuser
+%{_sbindir}/sulogin
 
 %{_bindir}/chrt
 %{_bindir}/ionice
@@ -432,10 +423,10 @@ exit 0
 %{_bindir}/logger
 %{_bindir}/look
 %{_bindir}/mcookie
-/sbin/fsck
-/sbin/fsck.cramfs
-/sbin/fsck.minix
-/sbin/mkfs.cramfs
+%{_sbindir}/fsck
+%{_sbindir}/fsck.cramfs
+%{_sbindir}/fsck.minix
+%{_sbindir}/mkfs.cramfs
 %{_bindir}/namei
 %{_bindir}/rename
 %{_bindir}/renice
@@ -458,13 +449,13 @@ exit 0
 %{_sbindir}/readprofile
 %{_sbindir}/rtcwake
 %{_sbindir}/ldattach
-/sbin/swapon
-/sbin/swapoff
-/sbin/switch_root
-/sbin/losetup
-/sbin/blkid
-/sbin/findfs
-/sbin/zramctl
+%{_sbindir}/swapon
+%{_sbindir}/swapoff
+%{_sbindir}/switch_root
+%{_sbindir}/losetup
+%{_sbindir}/blkid
+%{_sbindir}/findfs
+%{_sbindir}/zramctl
 %{_bindir}/choom
 /etc/mtab
 
@@ -532,4 +523,4 @@ exit 0
 
 %files -n cfdisk
 %defattr(-,root,root)
-/sbin/cfdisk
+%{_sbindir}/cfdisk
