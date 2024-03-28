@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Nikita Ukhrenkov <nikita.ukhrenkov@jolla.com>
+Date: Thu, 28 Mar 2024 16:32:09 +0200
+Subject: [PATCH] libblkid: (probe) Disable CD-ROM probing in
+ blkid_probe_set_device
+
+---
+ libblkid/src/probe.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libblkid/src/probe.c b/libblkid/src/probe.c
+index 5acd2732c026d6b5635b966b7c7a469bf65047f2..6437c393203c196999eae5291ee609ea42754a1b 100644
+--- a/libblkid/src/probe.c
++++ b/libblkid/src/probe.c
+@@ -1011,7 +1011,7 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
+ 		pr->flags |= BLKID_FL_NOSCAN_DEV;
+ 	}
+ 
+-#ifdef CDROM_GET_CAPABILITY
++#if 0 && defined(CDROM_GET_CAPABILITY)
+ 	else if (S_ISBLK(sb.st_mode) &&
+ 	    !blkid_probe_is_tiny(pr) &&
+ 	    !dm_uuid &&
