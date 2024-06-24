@@ -272,10 +272,14 @@ find  %{buildroot}%{_bindir}/ -type l \
 	| grep -E ".*(linux32|linux64|s390|s390x|i386|ppc|ppc64|ppc32|sparc|sparc64|sparc32|sparc32bash|mips|mips64|mips32|ia64|x86_64)$" \
 	| sed 's|^'%{buildroot}'||' >> symlinks.list
 
+# Only add symlinks when we build for usr not merged,
+# the check is to allow for easier transition.
+%if !0%{?usrmerged}
 # FIXME: Remove after UsrMove
 ln -sf %{_sbindir}/nologin %{buildroot}/sbin/nologin
 ln -sf %{_bindir}/su %{buildroot}/bin/su
 ln -sf %{_bindir}/mount %{buildroot}/bin/mount
+%endif
 
 
 %post
@@ -341,11 +345,16 @@ exit 0
 %{_bindir}/dmesg
 %attr(4755,root,root)	%{_bindir}/mount
 # FIXME: Remove after UsrMove
-%attr(4755,root,root)	/bin/mount
 %attr(4755,root,root)	%{_bindir}/umount
 %attr(4755,root,root)	%{_bindir}/su
+# Only add symlinks when we build for usr not merged,
+# the check is to allow for easier transition.
+%if !0%{?usrmerged}
 # FIXME: Remove after UsrMove
+%attr(4755,root,root)	/bin/mount
 %attr(4755,root,root)	/bin/su
+/sbin/nologin
+%endif
 %attr(755,root,root)	%{_bindir}/login
 %attr(4711,root,root)	%{_bindir}/chfn
 %attr(4711,root,root)	%{_bindir}/chsh
@@ -397,8 +406,6 @@ exit 0
 %{_sbindir}/mkfs
 %{_sbindir}/mkfs.minix
 %{_sbindir}/mkswap
-# FIXME: Remove after UsrMove
-/sbin/nologin
 %{_sbindir}/nologin
 %{_sbindir}/runuser
 %{_sbindir}/sulogin
