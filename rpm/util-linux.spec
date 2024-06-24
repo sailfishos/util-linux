@@ -279,6 +279,7 @@ find  %{buildroot}%{_bindir}/ -type l \
 ln -sf %{_sbindir}/nologin %{buildroot}/sbin/nologin
 ln -sf %{_bindir}/su %{buildroot}/bin/su
 ln -sf %{_bindir}/mount %{buildroot}/bin/mount
+ln -sf %{_sbindir}/losetup %{buildroot}/sbin/losetup
 %endif
 
 
@@ -354,6 +355,7 @@ exit 0
 %attr(4755,root,root)	/bin/mount
 %attr(4755,root,root)	/bin/su
 /sbin/nologin
+/sbin/losetup
 %endif
 %attr(755,root,root)	%{_bindir}/login
 %attr(4711,root,root)	%{_bindir}/chfn
