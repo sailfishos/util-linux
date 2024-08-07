@@ -280,6 +280,10 @@ ln -sf %{_sbindir}/nologin %{buildroot}/sbin/nologin
 ln -sf %{_bindir}/su %{buildroot}/bin/su
 ln -sf %{_bindir}/mount %{buildroot}/bin/mount
 ln -sf %{_sbindir}/losetup %{buildroot}/sbin/losetup
+ln -sf %{_sbindir}/agetty %{buildroot}/sbin/agetty
+ln -sf %{_sbindir}/mkswap %{buildroot}/sbin/mkswap
+ln -sf %{_sbindir}/swapoff %{buildroot}/sbin/swapoff
+ln -sf %{_sbindir}/swapon %{buildroot}/sbin/swapon
 %endif
 
 
@@ -356,6 +360,10 @@ exit 0
 %attr(4755,root,root)	/bin/su
 /sbin/nologin
 /sbin/losetup
+/sbin/agetty
+/sbin/mkswap
+/sbin/swapoff
+/sbin/swapon
 %endif
 %attr(755,root,root)	%{_bindir}/login
 %attr(4711,root,root)	%{_bindir}/chfn
