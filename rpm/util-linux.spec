@@ -279,6 +279,8 @@ find  %{buildroot}%{_bindir}/ -type l \
 ln -sf %{_sbindir}/nologin %{buildroot}/sbin/nologin
 ln -sf %{_bindir}/su %{buildroot}/bin/su
 ln -sf %{_bindir}/mount %{buildroot}/bin/mount
+ln -sf %{_bindir}/umount %{buildroot}/bin/umount
+ln -sf %{_bindir}/kill %{buildroot}/bin/kill
 ln -sf %{_sbindir}/losetup %{buildroot}/sbin/losetup
 ln -sf %{_sbindir}/agetty %{buildroot}/sbin/agetty
 ln -sf %{_sbindir}/mkswap %{buildroot}/sbin/mkswap
@@ -357,7 +359,9 @@ exit 0
 %if !0%{?usrmerged}
 # FIXME: Remove after UsrMove
 %attr(4755,root,root)	/bin/mount
+%attr(4755,root,root)	/bin/umount
 %attr(4755,root,root)	/bin/su
+/bin/kill
 /sbin/nologin
 /sbin/losetup
 /sbin/agetty
