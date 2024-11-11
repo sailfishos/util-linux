@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.38.1
+Version:        2.40.2
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -16,6 +16,7 @@ BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libcrypt)
 BuildRequires:  libutempter-devel
 BuildRequires:  bison
+BuildRequires:  flex
 
 ### Sources
 Source0:        %{name}-%{version}.tar.xz
@@ -202,7 +203,11 @@ export SUID_LDFLAGS="-pie"
 	--with-utempter \
 	--without-python \
 	--disable-bash-completion \
-	--disable-makeinstall-chown
+	--disable-makeinstall-chown \
+	--disable-year2038 \
+	--disable-liblastlog2 \
+	--disable-pam-lastlog2 \
+	--disable-lsfd
 
 # build util-linux
 %make_build
@@ -345,6 +350,9 @@ exit 0
 %config(noreplace)	%{_sysconfdir}/pam.d/runuser-l
 
 %{_bindir}/dmesg
+%{_bindir}/enosys
+%{_bindir}/exch
+%{_bindir}/fadvise
 %attr(4755,root,root)	%{_bindir}/mount
 # FIXME: Remove after UsrMove
 %attr(4755,root,root)	%{_bindir}/umount
@@ -375,6 +383,7 @@ exit 0
 %{_bindir}/taskset
 %{_bindir}/findmnt
 %{_bindir}/lsblk
+%{_bindir}/lsclocks
 %{_bindir}/lscpu
 %{_bindir}/lsipc
 %{_bindir}/lsirq
@@ -384,6 +393,7 @@ exit 0
 %{_bindir}/mountpoint
 %{_bindir}/mesg
 %{_bindir}/nsenter
+%{_bindir}/pipesz
 %{_bindir}/prlimit
 %{_bindir}/uname26
 
@@ -451,6 +461,7 @@ exit 0
 %{_bindir}/scriptlive
 %{_bindir}/scriptreplay
 %{_bindir}/setarch
+%{_bindir}/setpgid
 %{_bindir}/setsid
 %{_bindir}/setterm
 %{_bindir}/uclampset
