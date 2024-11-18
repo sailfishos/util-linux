@@ -31,10 +31,6 @@ Source15:       util-linux-runuser-l.pamd
 Patch0:         0001-libblkid-probe-Disable-CD-ROM-probing-in-blkid_probe.patch
 
 ### Obsoletes & Conflicts & Provides
-# docs no longer generated due to needing lots of dependencies via rubygem-asciidoctor
-Obsoletes:      util-linux-doc <= 2.38.1
-Provides:       util-linux-doc = %{version}-%{release}
-
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
 Requires:       libuuid = %{version}-%{release}
