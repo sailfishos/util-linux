@@ -1,6 +1,6 @@
 ### Header
 Name:           util-linux
-Version:        2.38.1
+Version:        2.40.2
 Release:        1
 License:        GPLv2 and GPLv2+ and BSD with advertising and Public Domain
 Summary:        A collection of basic system utilities
@@ -16,6 +16,7 @@ BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libcrypt)
 BuildRequires:  libutempter-devel
 BuildRequires:  bison
+BuildRequires:  flex
 
 ### Sources
 Source0:        %{name}-%{version}.tar.xz
@@ -31,24 +32,20 @@ Source15:       util-linux-runuser-l.pamd
 Patch0:         0001-libblkid-probe-Disable-CD-ROM-probing-in-blkid_probe.patch
 
 ### Obsoletes & Conflicts & Provides
-# docs no longer generated due to needing lots of dependencies via rubygem-asciidoctor
-Obsoletes: util-linux-doc <= 2.38.1
-Provides: util-linux-doc = %{version}-%{release}
-
 Requires:       /etc/pam.d/system-auth
 Requires:       pam >= 0.66-4
-Provides:       mount
-Requires: libuuid = %{version}-%{release}
-Requires: libblkid = %{version}-%{release}
-Requires: libmount = %{version}-%{release}
-Requires: libsmartcols = %{version}-%{release}
-Requires: libfdisk = %{version}-%{release}
+Requires:       libuuid = %{version}-%{release}
+Requires:       libblkid = %{version}-%{release}
+Requires:       libmount = %{version}-%{release}
+Requires:       libsmartcols = %{version}-%{release}
+Requires:       libfdisk = %{version}-%{release}
 # Ensure that /var/log/lastlog has owner (setup)
-Requires: setup
+Requires:       setup
 Requires(post): coreutils
 
-Obsoletes: rfkill < %{version}-%{release}
-Provides: rfkill = %{version}-%{release}
+Obsoletes:      rfkill < %{version}-%{release}
+Provides:       rfkill = %{version}-%{release}
+Provides:       mount
 
 %description
 The util-linux package contains a large variety of low-level system
@@ -57,35 +54,35 @@ others, Util-linux contains the fdisk configuration tool and the login
 program.
 
 %package -n libsmartcols
-Summary: Formatting library for ls-like programs.
-License: LGPLv2+
+Summary:        Formatting library for ls-like programs
+License:        LGPLv2+
 
 %description -n libsmartcols
 This is library for ls-like terminal programs, part of util-linux.
 
 %package -n libsmartcols-devel
-Summary: Formatting library for ls-like programs.
-License: LGPLv2+
-Requires: libsmartcols = %{version}-%{release}
-Requires: pkgconfig
+Summary:        Formatting library for ls-like programs
+License:        LGPLv2+
+Requires:       libsmartcols = %{version}-%{release}
+Requires:       pkgconfig
 
 %description -n libsmartcols-devel
 This is development library and headers for ls-like terminal programs,
 part of util-linux.
 
 %package -n libmount
-Summary: Device mounting library
-License: LGPLv2+
-Requires: libblkid = %{version}-%{release}
-Requires: libuuid = %{version}-%{release}
+Summary:        Device mounting library
+License:        LGPLv2+
+Requires:       libblkid = %{version}-%{release}
+Requires:       libuuid = %{version}-%{release}
 
 %description -n libmount
 This is the device mounting library, part of util-linux.
 
 %package -n libmount-devel
-Summary: Device mounting library
-License: LGPLv2+
-Requires: libmount = %{version}-%{release}
+Summary:        Device mounting library
+License:        LGPLv2+
+Requires:       libmount = %{version}-%{release}
 
 %description -n libmount-devel
 This is the device mounting development library and headers,
@@ -110,16 +107,16 @@ This is the block device identification development library and headers,
 part of util-linux.
 
 %package -n libfdisk
-Summary: Partitioning library for fdisk-like programs.
-License: LGPLv2+
+Summary:        Partitioning library for fdisk-like programs
+License:        LGPLv2+
 
 %description -n libfdisk
 This is library for fdisk-like programs, part of util-linux.
 
 %package -n libfdisk-devel
-Summary:  Partitioning library for fdisk-like programs.
-License: LGPLv2+
-Requires: libfdisk = %{version}-%{release}
+Summary:        Partitioning library for fdisk-like programs
+License:        LGPLv2+
+Requires:       libfdisk = %{version}-%{release}
 
 %description -n libfdisk-devel
 This is development library and headers for fdisk-like programs,
@@ -165,7 +162,7 @@ See also the "uuid-devel" package, which is a separate implementation.
 License:        GPLv2+
 Summary:        Helper daemon to guarantee uniqueness of time-based UUIDs
 Requires:       libuuid = %{version}-%{release}
-Requires(pre): shadow-utils
+Requires(pre):  shadow-utils
 
 %description -n uuidd
 The uuidd package contains a userspace daemon (uuidd) which guarantees
@@ -174,7 +171,7 @@ SMP systems.
 
 %package -n cfdisk
 License:        GPLv2+
-Summary:        cfdisk is a curses-based program for partitioning any block device
+Summary:        curses-based program for partitioning any block device
 
 %description -n cfdisk
 %{summary}.
@@ -206,7 +203,11 @@ export SUID_LDFLAGS="-pie"
 	--with-utempter \
 	--without-python \
 	--disable-bash-completion \
-	--disable-makeinstall-chown
+	--disable-makeinstall-chown \
+	--disable-year2038 \
+	--disable-liblastlog2 \
+	--disable-pam-lastlog2 \
+	--disable-lsfd
 
 # build util-linux
 %make_build
@@ -306,7 +307,7 @@ chmod 0644 /var/log/lastlog
 ### Move blkid cache to /run
 [ -d /run/blkid ] || mkdir -p /run/blkid
 for I in /etc/blkid.tab /etc/blkid.tab.old \
-         /etc/blkid/blkid.tab /etc/blkid/blkid.tab.old; do
+	/etc/blkid/blkid.tab /etc/blkid/blkid.tab.old; do
 
 	if [ -f "$I" ]; then
 		mv "$I" /run/blkid/ || :
@@ -331,13 +332,12 @@ done
 getent group uuidd >/dev/null || groupadd -r uuidd
 getent passwd uuidd >/dev/null || \
 useradd -r -g uuidd -d /var/lib/libuuid -s %{_sbindir}/nologin \
-    -c "UUID generator helper daemon" uuidd
+	-c "UUID generator helper daemon" uuidd
 exit 0
 
 %lang_package
 
 %files -f symlinks.list
-%defattr(-,root,root)
 %license Documentation/licenses/*
 
 %config(noreplace)	%{_sysconfdir}/pam.d/chfn
@@ -346,10 +346,13 @@ exit 0
 %config(noreplace)	%{_sysconfdir}/pam.d/remote
 %config(noreplace)	%{_sysconfdir}/pam.d/su
 %config(noreplace)	%{_sysconfdir}/pam.d/su-l
-%config(noreplace)      %{_sysconfdir}/pam.d/runuser
-%config(noreplace)      %{_sysconfdir}/pam.d/runuser-l
+%config(noreplace)	%{_sysconfdir}/pam.d/runuser
+%config(noreplace)	%{_sysconfdir}/pam.d/runuser-l
 
 %{_bindir}/dmesg
+%{_bindir}/enosys
+%{_bindir}/exch
+%{_bindir}/fadvise
 %attr(4755,root,root)	%{_bindir}/mount
 # FIXME: Remove after UsrMove
 %attr(4755,root,root)	%{_bindir}/umount
@@ -380,6 +383,7 @@ exit 0
 %{_bindir}/taskset
 %{_bindir}/findmnt
 %{_bindir}/lsblk
+%{_bindir}/lsclocks
 %{_bindir}/lscpu
 %{_bindir}/lsipc
 %{_bindir}/lsirq
@@ -389,6 +393,7 @@ exit 0
 %{_bindir}/mountpoint
 %{_bindir}/mesg
 %{_bindir}/nsenter
+%{_bindir}/pipesz
 %{_bindir}/prlimit
 %{_bindir}/uname26
 
@@ -416,7 +421,6 @@ exit 0
 %{_sbindir}/fdisk
 %{_sbindir}/clock
 %{_sbindir}/hwclock
-%{_sbindir}/hwclock
 %{_sbindir}/mkfs
 %{_sbindir}/mkfs.minix
 %{_sbindir}/mkswap
@@ -442,7 +446,6 @@ exit 0
 %{_bindir}/ipcs
 %{_bindir}/irqtop
 %{_bindir}/isosize
-%{_bindir}/kill
 %{_bindir}/logger
 %{_bindir}/look
 %{_bindir}/mcookie
@@ -458,6 +461,7 @@ exit 0
 %{_bindir}/scriptlive
 %{_bindir}/scriptreplay
 %{_bindir}/setarch
+%{_bindir}/setpgid
 %{_bindir}/setsid
 %{_bindir}/setterm
 %{_bindir}/uclampset
@@ -483,67 +487,55 @@ exit 0
 /etc/mtab
 
 %files -n uuidd
-%defattr(-,root,root)
 %license Documentation/licenses/COPYING.GPL-2.0-or-later
 %attr(-, uuidd, uuidd) %{_sbindir}/uuidd
 %dir %attr(2775, uuidd, uuidd) /var/lib/libuuid
 %dir %attr(2775, uuidd, uuidd) /var/run/uuidd
 
 %files -n libsmartcols
-%defattr(-,root,root)
 %license Documentation/licenses/COPYING.LGPL-2.1-or-later libsmartcols/COPYING
 %{_libdir}/libsmartcols.so.*
 
 %files -n libsmartcols-devel
-%defattr(-,root,root)
 %{_libdir}/libsmartcols.so
 %{_includedir}/libsmartcols
 %{_libdir}/pkgconfig/smartcols.pc
 
 %files -n libmount
-%defattr(-,root,root)
 %license libmount/COPYING
 %{_libdir}/libmount.so.*
 
 %files -n libmount-devel
-%defattr(-,root,root)
 %{_libdir}/libmount.so
 %{_includedir}/libmount
 %{_libdir}/pkgconfig/mount.pc
 
 %files -n libblkid
-%defattr(-,root,root)
 %license libblkid/COPYING
 %{_libdir}/libblkid.so.*
 
 %files -n libblkid-devel
-%defattr(-,root,root)
 %{_libdir}/libblkid.so
 %{_includedir}/blkid
 %{_libdir}/pkgconfig/blkid.pc
 
 %files -n libfdisk
-%defattr(-,root,root)
 %license libfdisk/COPYING
 %{_libdir}/libfdisk.so.*
 
 %files -n libfdisk-devel
-%defattr(-,root,root)
 %{_libdir}/libfdisk.so
 %{_includedir}/libfdisk
 %{_libdir}/pkgconfig/fdisk.pc
 
 %files -n libuuid
-%defattr(-,root,root)
 %license libuuid/COPYING
 %{_libdir}/libuuid.so.*
 
 %files -n libuuid-devel
-%defattr(-,root,root)
 %{_libdir}/libuuid.so
 %{_includedir}/uuid
 %{_libdir}/pkgconfig/uuid.pc
 
 %files -n cfdisk
-%defattr(-,root,root)
 %{_sbindir}/cfdisk

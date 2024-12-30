@@ -9,10 +9,10 @@ Subject: [PATCH] libblkid: (probe) Disable CD-ROM probing in
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libblkid/src/probe.c b/libblkid/src/probe.c
-index 5acd2732c026d6b5635b966b7c7a469bf65047f2..6437c393203c196999eae5291ee609ea42754a1b 100644
+index 76905e197..43e2adcb1 100644
 --- a/libblkid/src/probe.c
 +++ b/libblkid/src/probe.c
-@@ -1011,7 +1011,7 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
+@@ -1128,7 +1128,7 @@ int blkid_probe_set_device(blkid_probe pr, int fd,
  		pr->flags |= BLKID_FL_NOSCAN_DEV;
  	}
  
