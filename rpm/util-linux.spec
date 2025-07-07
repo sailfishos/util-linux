@@ -278,6 +278,7 @@ find  %{buildroot}%{_bindir}/ -type l \
 %if !0%{?usrmerged}
 # FIXME: Remove after UsrMove
 ln -sf %{_sbindir}/nologin %{buildroot}/sbin/nologin
+ln -sf %{_bindir}/login %{buildroot}/bin/login
 ln -sf %{_bindir}/su %{buildroot}/bin/su
 ln -sf %{_bindir}/mount %{buildroot}/bin/mount
 ln -sf %{_bindir}/umount %{buildroot}/bin/umount
@@ -364,6 +365,7 @@ exit 0
 %attr(4755,root,root)	/bin/mount
 %attr(4755,root,root)	/bin/umount
 %attr(4755,root,root)	/bin/su
+/bin/login
 /bin/kill
 /sbin/nologin
 /sbin/losetup
